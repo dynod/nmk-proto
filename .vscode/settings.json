@@ -29,7 +29,9 @@
         "pyvenv",
         "sdist",
         "venv",
-        "loadme"
+        "loadme",
+        "proto",
+        "grpcio"
     ],
     "python.analysis.extraPaths": [
         "src"
