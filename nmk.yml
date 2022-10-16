@@ -1,0 +1,25 @@
+refs:
+    # All base plugins (+current one)
+    - pip://nmk-python!plugin.yml
+    - pip://nmk-vscode!plugin.yml
+    - pip://nmk-github!plugin.yml
+    - src/nmk_proto/plugin.yml
+    - <workspace>/shared.yml
+    - workspace:
+        local: ../../../../shared
+        remote: github://dynod/workspace/main/shared
+
+config:
+    # Python package
+    pythonPackage: nmk-proto
+    
+    # Nmk dependencies
+    pythonPackageRequirements:
+        - nmk-base
+
+    # Extra setup data
+    pythonSetupItems:
+        metadata:
+            description: Code generation plugin from proto files for nmk build system
+        options.package_data:
+                nmk_proto: "*.yml"
