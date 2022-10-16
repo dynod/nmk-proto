@@ -1,2 +1,28 @@
 # Proto plugin definition
-refs: []
+refs:
+    - path.yml
+
+# Extra config
+config:
+
+    # Plugin version
+    nmkProtoPluginVersion:
+        __resolver__: nmk_proto.NmkProtoVersionResolver
+
+    # Plugin versions dict
+    nmkPluginsVersions:
+        nmk-proto: ${nmkProtoPluginVersion}
+
+    # Plugin help links dict
+    nmkPluginsDocs:
+        nmk-proto: https://github.com/dynod/nmk/wiki/nmk-proto-plugin
+
+    # Additional tools for code generation
+    venvPkgDeps:
+        - grpcio-tools
+
+    # Extra keywords for spell check
+    vscodeSettingsItems:
+        cSpell.words:
+            - proto
+            - grpcio

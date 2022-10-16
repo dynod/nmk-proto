@@ -1,0 +1,6 @@
+refs:
+    - <base-plugin>/src/nmk_base/plugin.yml
+    - base-plugin:
+        remote: github://dynod/nmk-base/main
+        local: ../../../../../../base
+    - pip://nmk-proto!plugin.yml
