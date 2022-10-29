@@ -16,6 +16,7 @@ config:
     # Nmk dependencies
     pythonPackageRequirements:
         - nmk-base
+        - Jinja2
 
     # Extra setup data
     pythonSetupItems:
@@ -23,3 +24,4 @@ config:
             description: Code generation plugin from proto files for nmk build system
         options.package_data:
                 nmk_proto: "*.yml"
+                nmk_proto.templates: "*.jinja"

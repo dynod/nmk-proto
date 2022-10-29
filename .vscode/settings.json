@@ -31,7 +31,10 @@
         "venv",
         "loadme",
         "proto",
-        "grpcio"
+        "protos",
+        "protoc",
+        "grpcio",
+        "dynod"
     ],
     "python.analysis.extraPaths": [
         "src"

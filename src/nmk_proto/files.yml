@@ -1,0 +1,14 @@
+config:
+    # Folder for proto sources
+    protoFolder: "${PROJECTDIR}/protos"
+
+    # Dependencies (extra proto paths for generation -- to be defined by using project)
+    protoDeps: []
+
+    # Found proto source files
+    protoInputFiles:
+        __resolver__: nmk_proto.files.ProtoFilesFinder
+
+    # Found proto source folder sub-directories
+    protoInputSubDirs:
+        __resolver__: nmk_proto.files.ProtoSubDirsFinder
