@@ -1,0 +1,44 @@
+# Code generation for Python projects
+config:
+
+    # Generated Python files
+    protoPythonFiles:
+        __resolver__: nmk_proto.python.OutputFilesFinder
+
+    # Generated python modules
+    protoPythonSrcFolders:
+        __resolver__: nmk_proto.python.OutputFoldersFinder
+    protoPythonSrcFoldersWildcard:
+        __resolver__: nmk_proto.python.OutputFoldersFinderWithWildcard
+
+    # Generated init file template
+    protoPythonGeneratedInitTemplate: ${BASEDIR}/templates/init.py.jinja
+
+    # git: ignore generated files
+    gitIgnoredFiles:
+        - ${protoPythonSrcFolders}
+
+    # flake8 + coverage: ignore generated files
+    pythonSetupItems:
+        flake8:
+            exclude:
+                - ${protoPythonSrcFolders}
+        run:
+            omit:
+                - ${protoPythonSrcFoldersWildcard}
+
+tasks:
+
+    # Generate Python files
+    proto.python:
+        description: Generate python code
+        emoji: ":pencil:.:snake:"
+        appendToDeps: setup
+        if: ${protoPythonFiles}   # Only if python generated files are expected
+        input:
+            - ${protoInputFiles}
+        output:
+            - ${protoPythonFiles}
+        builder: nmk_proto.python.ProtoPythonBuilder
+        params:
+            init_template: ${protoPythonGeneratedInitTemplate}

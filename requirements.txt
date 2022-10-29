@@ -20,6 +20,7 @@ flake8-bugbear
 setuptools
 wheel
 nmk-base
+Jinja2
 pytest-xdist
 pytest-cov
 pytest-multilog

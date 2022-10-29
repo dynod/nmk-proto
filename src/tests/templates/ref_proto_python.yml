@@ -1,2 +1,3 @@
 refs:
+    - pip://nmk-python!plugin.yml
     - pip://nmk-proto!plugin.yml

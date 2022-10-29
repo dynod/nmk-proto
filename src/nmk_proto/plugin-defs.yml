@@ -1,6 +1,8 @@
 # Proto plugin definition
 refs:
-    - path.yml
+    - path.yml    # Python path contrib
+    - files.yml   # Proto files config
+    - python.yml  # Code generation for Python
 
 # Extra config
 config:
@@ -21,8 +23,14 @@ config:
     venvPkgDeps:
         - grpcio-tools
 
+    # Recommended extension for proto files handling
+    vscodeExtensionsNames:
+        - zxh404.vscode-proto3
+
     # Extra keywords for spell check
     vscodeSettingsItems:
         cSpell.words:
             - proto
+            - protos
+            - protoc
             - grpcio
