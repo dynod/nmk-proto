@@ -27,10 +27,15 @@ config:
     vscodeExtensionsNames:
         - zxh404.vscode-proto3
 
-    # Extra keywords for spell check
+    # Extra VSCode settings
     vscodeSettingsItems:
+        # Spell check for proto files
+        cSpell.enabledLanguageIds:
+            - proto3
+        # Extra keywords for spell check
         cSpell.words:
             - proto
             - protos
             - protoc
+            - protobuf
             - grpcio

@@ -5,6 +5,10 @@ config:
     protoPythonFiles:
         __resolver__: nmk_proto.python.OutputFilesFinder
 
+    # Contribute to python files
+    pythonSrcFiles:
+        - ${protoPythonFiles}
+
     # Generated python modules
     protoPythonSrcFolders:
         __resolver__: nmk_proto.python.OutputFoldersFinder
@@ -27,13 +31,22 @@ config:
             omit:
                 - ${protoPythonSrcFoldersWildcard}
 
+    # Add GRPC dependencies to generated package
+    pythonPackageRequirements:
+        - grpcio
+        - protobuf
+
 tasks:
 
     # Generate Python files
     proto.python:
         description: Generate python code
         emoji: ":pencil:.:snake:"
-        appendToDeps: setup
+        appendToDeps:
+            # In case of python projet, run before code format task...
+            - py.format
+            # Otherwise, this is just a setup task (it will be skipped anyway)
+            - setup
         if: ${protoPythonFiles}   # Only if python generated files are expected
         input:
             - ${protoInputFiles}
