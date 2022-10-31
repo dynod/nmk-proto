@@ -47,9 +47,9 @@ class TestProtoPlugin(NmkBaseTester):
         )
 
     def test_generate_python(self):
-        # Generate python code from proto
+        # Generate python code from proto (declared as dependency of python code format)
         project = self.prepare_proto_project("python")
-        self.nmk(project, extra_args=["proto.python", "git.ignore", "py.setup"])
+        self.nmk(project, extra_args=["git.ignore", "py.format"])
         src_path = self.test_folder / "src" / "sample_module"
         assert (src_path / "sample_pb2.py").is_file()
         assert (src_path / "sample_pb2_grpc.py").is_file()
@@ -69,5 +69,5 @@ class TestProtoPlugin(NmkBaseTester):
         assert "src/sample_module/*" in setup_config["run"]["omit"].split("\n")
 
         # Test incremental build
-        self.nmk(project, extra_args=["proto.python"])
-        self.check_logs("Nothing to do")
+        self.nmk(project, extra_args=["py.format"])
+        self.check_logs(["[proto.python]] DEBUG 🐛 - Task skipped, nothing to do", "[py.format]] DEBUG 🐛 - Task skipped, nothing to do"])
