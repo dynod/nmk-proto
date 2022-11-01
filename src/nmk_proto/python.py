@@ -2,12 +2,13 @@ import sys
 from pathlib import Path
 from typing import List
 
+from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkListConfigResolver
 from nmk.utils import run_with_logs
 from nmk_base.common import TemplateBuilder
 
-from nmk_proto.utils import get_input_sub_folders, get_proto_folder
+from nmk_proto.utils import get_input_sub_folders, get_proto_folder, get_proto_paths_options
 
 
 # Grab some config items
@@ -55,21 +56,26 @@ class OutputFoldersFinderWithWildcard(OutputFoldersFinder):
 
 
 class ProtoPythonBuilder(TemplateBuilder):
+    def make_absolute(self, option: str) -> Path:
+        if not option.startswith("--") and not Path(option).is_absolute():
+            return str(Path(self.model.config[NmkRootConfig.PROJECT_DIR].value) / option)
+        return option
+
     def build(self, init_template: str):
         # Grab some config items
-        target_src, proto_src, out_folders = (get_python_src_folder(self.model), get_proto_folder(self.model), get_python_out_folders(self.model))
+        target_src, out_folders = (get_python_src_folder(self.model), get_python_out_folders(self.model))
         target_src.mkdir(parents=True, exist_ok=True)
+
+        # Build proto paths list
+        proto_paths = [self.make_absolute(o) for o in get_proto_paths_options(self.model)]
 
         # Iterate on inputs (proto files)
         for proto_file in self.inputs:
             # Delegate to protoc
             run_with_logs(
-                [
-                    sys.executable,
-                    "-m",
-                    "grpc_tools.protoc",
-                    "--proto_path",
-                    str(proto_src),
+                [sys.executable, "-m", "grpc_tools.protoc"]
+                + proto_paths
+                + [
                     "--python_out",
                     str(target_src),
                     "--grpc_python_out",

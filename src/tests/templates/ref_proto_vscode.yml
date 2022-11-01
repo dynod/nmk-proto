@@ -1,0 +1,3 @@
+refs:
+    - pip://nmk-proto!plugin.yml
+    - pip://nmk-vscode!plugin.yml

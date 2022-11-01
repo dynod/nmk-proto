@@ -32,6 +32,12 @@ class TestProtoPlugin(NmkBaseTester):
         self.nmk(self.prepare_proto_project(), extra_args=["--print", "protoInputFiles", "--print", "protoInputSubDirs"])
         self.check_logs(f'{{ "protoInputFiles": [ "{self.escape(self.target_proto)}" ], "protoInputSubDirs": [ "sample_module" ] }}')
 
+    def test_vscode_settings(self):
+        # Verify generated settings
+        self.nmk(self.prepare_proto_project("vscode"), extra_args=["vs.settings"])
+        settings = self.test_folder / ".vscode" / "settings.json"
+        assert settings.is_file()
+
     def test_python_files_without_python(self):
         # Verify that there are no expected python files without python plugin
         self.nmk(self.prepare_proto_project(), extra_args=["--print", "protoPythonFiles", "--print", "protoPythonSrcFolders"])
