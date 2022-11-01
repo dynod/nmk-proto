@@ -47,6 +47,12 @@
     "editor.formatOnSave": true,
     "task.allowAutomaticTasks": "on",
     "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "protoc": {
+        "options": [
+            "--proto_path",
+            "protos"
+        ]
+    },
     "cSpell.enabledLanguageIds": [
         "proto3"
     ]

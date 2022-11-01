@@ -12,3 +12,12 @@ config:
     # Found proto source folder sub-directories
     protoInputSubDirs:
         __resolver__: nmk_proto.files.ProtoSubDirsFinder
+
+    # "protoc" compiler options to browse all proto paths
+    protoPathOptions:
+        __resolver__: nmk_proto.files.ProtoPathOptionsBuilder
+
+    # Extra VSCode settings for proto files browsing
+    vscodeSettingsItems:
+        protoc:
+            options: ${protoPathOptions}

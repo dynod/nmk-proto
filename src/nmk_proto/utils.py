@@ -17,3 +17,13 @@ def get_input_proto_files(model: NmkModel) -> List[Path]:
 # Get input sub-folders
 def get_input_sub_folders(model: NmkModel) -> List[Path]:
     return model.config["protoInputSubDirs"].value
+
+
+# Get declared proto folders dependencies
+def get_proto_deps(model: NmkModel) -> List[str]:
+    return [Path(p) for p in model.config["protoDeps"].value]
+
+
+# Get generated proto paths options
+def get_proto_paths_options(model: NmkModel) -> List[str]:
+    return model.config["protoPathOptions"].value
