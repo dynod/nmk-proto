@@ -14,9 +14,14 @@ def get_input_proto_files(model: NmkModel) -> List[Path]:
     return model.config["protoInputFiles"].value
 
 
-# Get input sub-folders
-def get_input_sub_folders(model: NmkModel) -> List[Path]:
-    return model.config["protoInputSubDirs"].value
+# Get input sub-folders (all)
+def get_input_all_sub_folders(model: NmkModel) -> List[Path]:
+    return model.config["protoAllInputSubDirs"].value
+
+
+# Get input sub-folders (unique occurence filter)
+def get_input_unique_sub_folders(model: NmkModel) -> List[Path]:
+    return model.config["protoUniqueInputSubDirs"].value
 
 
 # Get declared proto folders dependencies

@@ -9,9 +9,11 @@ config:
     protoInputFiles:
         __resolver__: nmk_proto.files.ProtoFilesFinder
 
-    # Found proto source folder sub-directories
-    protoInputSubDirs:
-        __resolver__: nmk_proto.files.ProtoSubDirsFinder
+    # Found proto source folder sub-directories (list and set variables)
+    protoAllInputSubDirs:
+        __resolver__: nmk_proto.files.ProtoAllSubDirsFinder
+    protoUniqueInputSubDirs:
+        __resolver__: nmk_proto.files.ProtoUniqueSubDirsFinder
 
     # "protoc" compiler options to browse all proto paths
     protoPathOptions:

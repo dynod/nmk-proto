@@ -29,8 +29,8 @@ class TestProtoPlugin(NmkBaseTester):
 
     def test_proto_files(self):
         # Check found proto files
-        self.nmk(self.prepare_proto_project(), extra_args=["--print", "protoInputFiles", "--print", "protoInputSubDirs"])
-        self.check_logs(f'{{ "protoInputFiles": [ "{self.escape(self.target_proto)}" ], "protoInputSubDirs": [ "sample_module" ] }}')
+        self.nmk(self.prepare_proto_project(), extra_args=["--print", "protoInputFiles", "--print", "protoAllInputSubDirs"])
+        self.check_logs(f'{{ "protoInputFiles": [ "{self.escape(self.target_proto)}" ], "protoAllInputSubDirs": [ "sample_module" ] }}')
 
     def test_vscode_settings(self):
         # Verify generated settings
@@ -40,17 +40,33 @@ class TestProtoPlugin(NmkBaseTester):
 
     def test_python_files_without_python(self):
         # Verify that there are no expected python files without python plugin
-        self.nmk(self.prepare_proto_project(), extra_args=["--print", "protoPythonFiles", "--print", "protoPythonSrcFolders"])
-        self.check_logs('{ "protoPythonFiles": [], "protoPythonSrcFolders": [] }')
+        self.nmk(
+            self.prepare_proto_project(),
+            extra_args=["--print", "protoPythonGeneratedFiles", "--print", "protoPythonCopiedFiles", "--print", "protoPythonSrcFolders"],
+        )
+        self.check_logs('{ "protoPythonGeneratedFiles": [], "protoPythonCopiedFiles": [], "protoPythonSrcFolders": [] }')
 
     def test_python_files(self):
         # Verify expected python files
-        self.nmk(self.prepare_proto_project("python"), extra_args=["--print", "protoPythonFiles", "--print", "protoPythonSrcFolders"])
+        self.nmk(
+            self.prepare_proto_project("python"),
+            extra_args=["--print", "protoPythonGeneratedFiles", "--print", "protoPythonCopiedFiles", "--print", "protoPythonSrcFolders"],
+        )
         src_path = self.test_folder / "src" / "sample_module"
         self.check_logs(
-            f'{{ "protoPythonFiles": [ "{self.escape(src_path/"sample_pb2.py")}", "{self.escape(src_path/"sample_pb2_grpc.py")}", "{self.escape(src_path/"__init__.py")}" ], '
+            f'{{ "protoPythonGeneratedFiles": [ "{self.escape(src_path/"sample_pb2.py")}", "{self.escape(src_path/"sample_pb2_grpc.py")}", "{self.escape(src_path/"__init__.py")}" ], '
+            + f'"protoPythonCopiedFiles": [ "{self.escape(src_path/"sample.proto")}" ], '
             + f'"protoPythonSrcFolders": [ "{self.escape(src_path)}" ] }}'
         )
+
+    def test_python_proto_link(self):
+        # Create link to installed venv packages
+        project = self.prepare_proto_project()
+        self.nmk(project, extra_args=["proto.link"])
+        assert (self.test_folder / ".nmk" / "protos").exists()
+
+        # Try again (not created twice)
+        self.nmk(project, extra_args=["proto.link"])
 
     def test_generate_python(self):
         # Generate python code from proto (declared as dependency of python code format)
@@ -73,7 +89,12 @@ class TestProtoPlugin(NmkBaseTester):
         setup_config.read(setup)
         assert "src/sample_module" in setup_config["flake8"]["exclude"].split("\n")
         assert "src/sample_module/*" in setup_config["run"]["omit"].split("\n")
+        assert "*.proto" == setup_config["options.package_data"]["sample_module"]
 
         # Test incremental build
         self.nmk(project, extra_args=["py.format"])
         self.check_logs(["[proto.python]] DEBUG 🐛 - Task skipped, nothing to do", "[py.format]] DEBUG 🐛 - Task skipped, nothing to do"])
+
+        # Test rebuild after proto file touch
+        (self.test_folder / "protos" / "sample.proto").touch()
+        self.nmk(project, extra_args=["py.format"])
