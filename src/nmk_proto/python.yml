@@ -2,12 +2,16 @@
 config:
 
     # Generated Python files
-    protoPythonFiles:
-        __resolver__: nmk_proto.python.OutputFilesFinder
+    protoPythonGeneratedFiles:
+        __resolver__: nmk_proto.python.OutputPythonFilesFinder
+
+    # Copied proto files
+    protoPythonCopiedFiles:
+        __resolver__: nmk_proto.python.OutputProtoFilesFinder
 
     # Contribute to python files
     pythonSrcFiles:
-        - ${protoPythonFiles}
+        - ${protoPythonGeneratedFiles}
 
     # Generated python modules
     protoPythonSrcFolders:
@@ -17,6 +21,11 @@ config:
 
     # Generated init file template
     protoPythonGeneratedInitTemplate: ${BASEDIR}/templates/init.py.jinja
+
+    # Link to root venv dir (to be used for proto files packed as python packages)
+    protoPythonNmkRoot: ${PROJECTDIR}/.nmk/protos
+    protoDeps:
+        - ${protoPythonNmkRoot}
 
     # git: ignore generated files
     gitIgnoredFiles:
@@ -31,12 +40,25 @@ config:
             omit:
                 - ${protoPythonSrcFoldersWildcard}
 
+    # Embed proto files in python package
+    pythonSetupCfgFiles:
+        - ${BASEDIR}/templates/python_package_data.cfg.jinja
+
     # Add GRPC dependencies to generated package
     pythonPackageRequirements:
         - grpcio
         - protobuf
 
 tasks:
+
+    # Installed python packages folder (create link to venv)
+    proto.link:
+        description: Create installed packages folder link
+        emoji: file_folder
+        silent: true
+        output: ${protoPythonNmkRoot}
+        builder: nmk_proto.python.ProtoLinkBuilder
+        appendToDeps: setup
 
     # Generate Python files
     proto.python:
@@ -47,11 +69,12 @@ tasks:
             - py.format
             # Otherwise, this is just a setup task (it will be skipped anyway)
             - setup
-        if: ${protoPythonFiles}   # Only if python generated files are expected
+        if: ${protoPythonGeneratedFiles}   # Only if python generated files are expected
         input:
             - ${protoInputFiles}
         output:
-            - ${protoPythonFiles}
+            - ${protoPythonGeneratedFiles}
+            - ${protoPythonCopiedFiles}
         builder: nmk_proto.python.ProtoPythonBuilder
         params:
             init_template: ${protoPythonGeneratedInitTemplate}

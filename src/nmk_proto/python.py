@@ -1,14 +1,18 @@
+import os
+import shutil
 import sys
 from pathlib import Path
 from typing import List
 
+from nmk.model.builder import NmkTaskBuilder
+from nmk.model.cache import venv_libs
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkListConfigResolver
 from nmk.utils import run_with_logs
 from nmk_base.common import TemplateBuilder
 
-from nmk_proto.utils import get_input_sub_folders, get_proto_folder, get_proto_paths_options
+from nmk_proto.utils import get_input_all_sub_folders, get_input_unique_sub_folders, get_proto_folder, get_proto_paths_options
 
 
 # Grab some config items
@@ -26,12 +30,12 @@ class OutputFoldersFinder(NmkListConfigResolver):
         if "pythonSrcFolders" in self.model.config:
             # Grab some variables values
             target_src = get_python_src_folder(self.model)
-            return [target_src / p for p in get_input_sub_folders(self.model)]
+            return [target_src / p for p in get_input_unique_sub_folders(self.model)]
         else:
             return []
 
 
-class OutputFilesFinder(NmkListConfigResolver):
+class OutputPythonFilesFinder(NmkListConfigResolver):
     def get_value(self, name: str) -> List[Path]:
         # Do we have python output folders
         output_folders = get_python_out_folders(self.model)
@@ -49,10 +53,45 @@ class OutputFilesFinder(NmkListConfigResolver):
             return []
 
 
+class OutputProtoFilesFinder(NmkListConfigResolver):
+    def get_value(self, name: str) -> List[Path]:
+        # Do we have python output folders
+        output_folders = get_python_out_folders(self.model)
+        if len(output_folders):
+            # Grab some variables values
+            target_src, proto_src = (get_python_src_folder(self.model), get_proto_folder(self.model))
+
+            # Copied proto file in python folder
+            return [target_src / p_file for p_file in [Path(p).relative_to(proto_src) for p in self.model.config["protoInputFiles"].value]]
+        else:
+            return []
+
+
 class OutputFoldersFinderWithWildcard(OutputFoldersFinder):
     def get_value(self, name: str) -> List[Path]:
         # Same than parent, with a "*" wildcard
         return [p / "*" for p in super().get_value(name)]
+
+
+class ProtoLinkBuilder(NmkTaskBuilder):
+    def build(self):
+        # Only if link is not created yet
+        if not self.main_output.exists():
+            # Source path
+            src_path = venv_libs()
+
+            # Prepare output parent if not exists yet
+            self.main_output.parent.mkdir(exist_ok=True, parents=True)
+
+            # Ready to create symlink (platform dependent --> disable coverage)
+            if os.name == "nt":  # pragma: no branch
+                # Windows specific: create a directory junction (similar to a Linux symlink)
+                import _winapi  # pragma: no cover
+
+                _winapi.CreateJunction(str(src_path), str(self.main_output))  # pragma: no cover
+            else:  # pragma: no cover
+                # Standard symlink
+                os.symlink(src_path, self.main_output)  # pragma: no cover
 
 
 class ProtoPythonBuilder(TemplateBuilder):
@@ -63,14 +102,20 @@ class ProtoPythonBuilder(TemplateBuilder):
 
     def build(self, init_template: str):
         # Grab some config items
-        target_src, out_folders = (get_python_src_folder(self.model), get_python_out_folders(self.model))
-        target_src.mkdir(parents=True, exist_ok=True)
+        target_src, out_folders, sub_folders = (get_python_src_folder(self.model), get_python_out_folders(self.model), get_input_all_sub_folders(self.model))
+
+        # Clean and re-create target folders
+        for output_dir in out_folders:
+            candidate_dir = target_src / output_dir
+            if candidate_dir.is_dir():
+                shutil.rmtree(candidate_dir)
+            candidate_dir.mkdir(parents=True, exist_ok=True)
 
         # Build proto paths list
         proto_paths = [self.make_absolute(o) for o in get_proto_paths_options(self.model)]
 
         # Iterate on inputs (proto files)
-        for proto_file in self.inputs:
+        for proto_file, target_subdir in zip(self.inputs, sub_folders):
             # Delegate to protoc
             run_with_logs(
                 [sys.executable, "-m", "grpc_tools.protoc"]
@@ -83,6 +128,9 @@ class ProtoPythonBuilder(TemplateBuilder):
                     str(proto_file),
                 ]
             )
+
+            # Also simply copy proto file to output
+            shutil.copyfile(proto_file, target_src / target_subdir / proto_file.name)
 
         # Reorder output files
         importable_files = {out_folder.relative_to(target_src): [] for out_folder in out_folders}
