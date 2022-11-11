@@ -59,15 +59,6 @@ class TestProtoPlugin(NmkBaseTester):
             + f'"protoPythonSrcFolders": [ "{self.escape(src_path)}" ] }}'
         )
 
-    def test_python_proto_link(self):
-        # Create link to installed venv packages
-        project = self.prepare_proto_project()
-        self.nmk(project, extra_args=["proto.link"])
-        assert (self.test_folder / ".nmk" / "protos").exists()
-
-        # Try again (not created twice)
-        self.nmk(project, extra_args=["proto.link"])
-
     def test_generate_python(self):
         # Generate python code from proto (declared as dependency of python code format)
         project = self.prepare_proto_project("python")
@@ -90,6 +81,9 @@ class TestProtoPlugin(NmkBaseTester):
         assert "src/sample_module" in setup_config["flake8"]["exclude"].split("\n")
         assert "src/sample_module/*" in setup_config["run"]["omit"].split("\n")
         assert "*.proto" == setup_config["options.package_data"]["sample_module"]
+
+        # Test link to installed venv packages
+        assert (self.test_folder / ".nmk" / "protos").exists()
 
         # Test incremental build
         self.nmk(project, extra_args=["py.format"])
