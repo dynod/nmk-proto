@@ -58,12 +58,13 @@ tasks:
         silent: true
         output: ${protoPythonNmkRoot}
         builder: nmk_proto.python.ProtoLinkBuilder
-        appendToDeps: setup
 
     # Generate Python files
     proto.python:
         description: Generate python code
         emoji: ":pencil:.:snake:"
+        deps:
+            - proto.link
         appendToDeps:
             # In case of python projet, run before code format task...
             - py.format
