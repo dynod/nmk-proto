@@ -12,7 +12,7 @@ class TestProtoPlugin(NmkBaseTester):
 
     @property
     def target_proto(self) -> Path:
-        return self.test_folder / "protos" / "sample_module" / "sample.proto"
+        return self.test_folder / "protos" / "sample_module" / "api" / "sample.proto"
 
     def prepare_proto_project(self, other_plugin: str = None) -> Path:
         # Build a sample project with proto files
@@ -30,7 +30,9 @@ class TestProtoPlugin(NmkBaseTester):
     def test_proto_files(self):
         # Check found proto files
         self.nmk(self.prepare_proto_project(), extra_args=["--print", "protoInputFiles", "--print", "protoAllInputSubDirs"])
-        self.check_logs(f'{{ "protoInputFiles": [ "{self.escape(self.target_proto)}" ], "protoAllInputSubDirs": [ "sample_module" ] }}')
+        self.check_logs(
+            f'{{ "protoInputFiles": [ "{self.escape(self.target_proto)}" ], "protoAllInputSubDirs": [ "{self.escape(Path("sample_module")/"api")}" ] }}'
+        )
 
     def test_vscode_settings(self):
         # Verify generated settings
@@ -52,7 +54,7 @@ class TestProtoPlugin(NmkBaseTester):
             self.prepare_proto_project("python"),
             extra_args=["--print", "protoPythonGeneratedFiles", "--print", "protoPythonCopiedFiles", "--print", "protoPythonSrcFolders"],
         )
-        src_path = self.test_folder / "src" / "sample_module"
+        src_path = self.test_folder / "src" / "sample_module" / "api"
         self.check_logs(
             f'{{ "protoPythonGeneratedFiles": [ "{self.escape(src_path/"sample_pb2.py")}", "{self.escape(src_path/"sample_pb2_grpc.py")}", "{self.escape(src_path/"__init__.py")}" ], '
             + f'"protoPythonCopiedFiles": [ "{self.escape(src_path/"sample.proto")}" ], '
@@ -63,7 +65,7 @@ class TestProtoPlugin(NmkBaseTester):
         # Generate python code from proto (declared as dependency of python code format)
         project = self.prepare_proto_project("python")
         self.nmk(project, extra_args=["git.ignore", "py.format"])
-        src_path = self.test_folder / "src" / "sample_module"
+        src_path = self.test_folder / "src" / "sample_module" / "api"
         assert (src_path / "sample_pb2.py").is_file()
         assert (src_path / "sample_pb2_grpc.py").is_file()
 
@@ -71,16 +73,16 @@ class TestProtoPlugin(NmkBaseTester):
         git_ignore = self.test_folder / ".gitignore"
         assert git_ignore.is_file()
         with git_ignore.open() as f:
-            assert "src/sample_module" in f.read()
+            assert "src/sample_module/api" in f.read()
 
         # Test generated setup file
         setup = self.test_folder / "setup.cfg"
         assert setup.is_file()
         setup_config = ConfigParser()
         setup_config.read(setup)
-        assert "src/sample_module" in setup_config["flake8"]["exclude"].split("\n")
-        assert "src/sample_module/*" in setup_config["run"]["omit"].split("\n")
-        assert "*.proto" == setup_config["options.package_data"]["sample_module"]
+        assert "src/sample_module/api" in setup_config["flake8"]["exclude"].split("\n")
+        assert "src/sample_module/api/*" in setup_config["run"]["omit"].split("\n")
+        assert "*.proto" == setup_config["options.package_data"]["sample_module.api"]
 
         # Test link to installed venv packages
         assert (self.test_folder / ".nmk" / "protos").exists()

@@ -1,3 +1,3 @@
 [options.package_data]{% for package in protoUniqueInputSubDirs %}
-{{ package }} = *.proto{% endfor %}
+{{ package | replace('/','.') | replace('\\','.') }} = *.proto{% endfor %}
 
