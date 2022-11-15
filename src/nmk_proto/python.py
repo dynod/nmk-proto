@@ -1,4 +1,3 @@
-import os
 import shutil
 import sys
 from pathlib import Path
@@ -9,7 +8,7 @@ from nmk.model.cache import venv_libs
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkListConfigResolver
-from nmk.utils import run_with_logs
+from nmk.utils import create_dir_symlink, run_with_logs
 from nmk_base.common import TemplateBuilder
 
 from nmk_proto.utils import get_input_all_sub_folders, get_input_unique_sub_folders, get_proto_folder, get_proto_paths_options
@@ -83,15 +82,8 @@ class ProtoLinkBuilder(NmkTaskBuilder):
             # Prepare output parent if not exists yet
             self.main_output.parent.mkdir(exist_ok=True, parents=True)
 
-            # Ready to create symlink (platform dependent --> disable coverage)
-            if os.name == "nt":  # pragma: no branch
-                # Windows specific: create a directory junction (similar to a Linux symlink)
-                import _winapi  # pragma: no cover
-
-                _winapi.CreateJunction(str(src_path), str(self.main_output))  # pragma: no cover
-            else:  # pragma: no cover
-                # Standard symlink
-                os.symlink(src_path, self.main_output)  # pragma: no cover
+            # Ready to create symlink
+            create_dir_symlink(src_path, self.main_output)
 
 
 class ProtoPythonBuilder(TemplateBuilder):
