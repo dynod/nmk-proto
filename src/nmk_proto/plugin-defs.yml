@@ -30,7 +30,7 @@ config:
     # Extra VSCode settings
     vscodeSettingsItems:
         # Spell check for proto files
-        cSpell.enabledLanguageIds:
+        cSpell.enableFiletypes:
             - proto3
         # Extra keywords for spell check
         cSpell.words:

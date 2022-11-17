@@ -23,7 +23,7 @@ config:
     protoPythonGeneratedInitTemplate: ${BASEDIR}/templates/init.py.jinja
 
     # Link to root venv dir (to be used for proto files packed as python packages)
-    protoPythonNmkRoot: ${PROJECTDIR}/.nmk/protos
+    protoPythonNmkRoot: ${PROJECTDIR_NMK}/protos
     protoDeps:
         - ${protoPythonNmkRoot}
 
