@@ -1,10 +1,12 @@
 # nmk-proto
 proto code generation plugin for **`nmk`** build system
 
+<!-- NMK-BADGES-BEGIN -->
 [![License: MPL](https://img.shields.io/github/license/dynod/nmk-proto)](https://github.com/dynod/nmk-proto/blob/main/LICENSE)
-[![Checks](https://img.shields.io/github/workflow/status/dynod/nmk-proto/Build/main?label=build%20%26%20u.t.)](https://github.com/dynod/nmk-proto/actions?query=branch%3Amain)
+[![Checks](https://img.shields.io/github/actions/workflow/status/dynod/nmk-proto/build.yml?branch=main&label=build%20%26%20u.t.)](https://github.com/dynod/nmk-proto/actions?query=branch%3Amain)
 [![PyPI](https://img.shields.io/pypi/v/nmk-proto)](https://pypi.org/project/nmk-proto/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+<!-- NMK-BADGES-END -->
 
 This plugin adds support for code generation from proto files (aiming to be used be [gRPC framework](https://grpc.io/)) in an **`nmk`** project
 
