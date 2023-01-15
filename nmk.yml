@@ -26,3 +26,7 @@ config:
         options.package_data:
                 nmk_proto: "*.yml"
                 nmk_proto.templates: "*.jinja"
+
+    # Github issues logged in nmk project
+    githubIssuesRepo: nmk
+    githubIssuesLabel: "plugin:proto"
