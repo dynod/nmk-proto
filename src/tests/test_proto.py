@@ -22,7 +22,7 @@ class TestProtoPlugin(NmkBaseTester):
 
     def escape(self, to_escape: Path) -> str:
         # Escape backslashes (for Windows paths in json print)
-        return str(to_escape).replace("\\", "\\\\")
+        return '"' + str(to_escape).replace("\\", "\\\\") + '"'
 
     def test_version(self):
         self.nmk(self.prepare_proto_project(), extra_args=["version"])
@@ -31,7 +31,7 @@ class TestProtoPlugin(NmkBaseTester):
         # Check found proto files
         self.nmk(self.prepare_proto_project(), extra_args=["--print", "protoInputFiles", "--print", "protoAllInputSubDirs"])
         self.check_logs(
-            f'{{ "protoInputFiles": [ "{self.escape(self.target_proto)}" ], "protoAllInputSubDirs": [ "{self.escape(Path("sample_module")/"api")}" ] }}'
+            f'{{ "protoInputFiles": [ {self.escape(self.target_proto)} ], "protoAllInputSubDirs": [ {self.escape(Path("sample_module")/"api")} ] }}'
         )
 
     def test_vscode_settings(self):
@@ -56,9 +56,9 @@ class TestProtoPlugin(NmkBaseTester):
         )
         src_path = self.test_folder / "src" / "sample_module" / "api"
         self.check_logs(
-            f'{{ "protoPythonGeneratedFiles": [ "{self.escape(src_path/"sample_pb2.py")}", "{self.escape(src_path/"sample_pb2_grpc.py")}", "{self.escape(src_path/"__init__.py")}" ], '
-            + f'"protoPythonCopiedFiles": [ "{self.escape(src_path/"sample.proto")}" ], '
-            + f'"protoPythonSrcFolders": [ "{self.escape(src_path)}" ] }}'
+            f'{{ "protoPythonGeneratedFiles": [ {self.escape(src_path/"sample_pb2.py")}, {self.escape(src_path/"sample_pb2_grpc.py")}, {self.escape(src_path/"__init__.py")} ], '
+            + f'"protoPythonCopiedFiles": [ {self.escape(src_path/"sample.proto")} ], '
+            + f'"protoPythonSrcFolders": [ {self.escape(src_path)} ] }}'
         )
 
     def test_generate_python(self):
