@@ -1,17 +1,13 @@
 # Code generation for Python projects
 config:
 
-    # Generated Python files
-    protoPythonGeneratedFiles:
+    # Contribute to generated Python files
+    pythonGeneratedSrcFiles:
         __resolver__: nmk_proto.python.OutputPythonFilesFinder
 
     # Copied proto files
     protoPythonCopiedFiles:
         __resolver__: nmk_proto.python.OutputProtoFilesFinder
-
-    # Contribute to python files
-    pythonSrcFiles:
-        - ${protoPythonGeneratedFiles}
 
     # Generated python modules
     protoPythonSrcFolders:
@@ -70,11 +66,11 @@ tasks:
             - py.format
             # Otherwise, this is just a setup task (it will be skipped anyway)
             - setup
-        if: ${protoPythonGeneratedFiles}   # Only if python generated files are expected
+        if: ${pythonGeneratedSrcFiles}   # Only if python generated files are expected
         input:
             - ${protoInputFiles}
         output:
-            - ${protoPythonGeneratedFiles}
+            - ${pythonGeneratedSrcFiles}
             - ${protoPythonCopiedFiles}
         builder: nmk_proto.python.ProtoPythonBuilder
         params:
