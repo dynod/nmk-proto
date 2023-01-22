@@ -44,19 +44,19 @@ class TestProtoPlugin(NmkBaseTester):
         # Verify that there are no expected python files without python plugin
         self.nmk(
             self.prepare_proto_project(),
-            extra_args=["--print", "protoPythonGeneratedFiles", "--print", "protoPythonCopiedFiles", "--print", "protoPythonSrcFolders"],
+            extra_args=["--print", "pythonGeneratedSrcFiles", "--print", "protoPythonCopiedFiles", "--print", "protoPythonSrcFolders"],
         )
-        self.check_logs('{ "protoPythonGeneratedFiles": [], "protoPythonCopiedFiles": [], "protoPythonSrcFolders": [] }')
+        self.check_logs('{ "pythonGeneratedSrcFiles": [], "protoPythonCopiedFiles": [], "protoPythonSrcFolders": [] }')
 
     def test_python_files(self):
         # Verify expected python files
         self.nmk(
             self.prepare_proto_project("python"),
-            extra_args=["--print", "protoPythonGeneratedFiles", "--print", "protoPythonCopiedFiles", "--print", "protoPythonSrcFolders"],
+            extra_args=["--print", "pythonGeneratedSrcFiles", "--print", "protoPythonCopiedFiles", "--print", "protoPythonSrcFolders"],
         )
         src_path = self.test_folder / "src" / "sample_module" / "api"
         self.check_logs(
-            f'{{ "protoPythonGeneratedFiles": [ {self.escape(src_path/"sample_pb2.py")}, {self.escape(src_path/"sample_pb2_grpc.py")}, {self.escape(src_path/"__init__.py")} ], '
+            f'{{ "pythonGeneratedSrcFiles": [ {self.escape(src_path/"sample_pb2.py")}, {self.escape(src_path/"sample_pb2_grpc.py")}, {self.escape(src_path/"__init__.py")} ], '
             + f'"protoPythonCopiedFiles": [ {self.escape(src_path/"sample.proto")} ], '
             + f'"protoPythonSrcFolders": [ {self.escape(src_path)} ] }}'
         )
