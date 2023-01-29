@@ -3,6 +3,7 @@ refs:
     - path.yml    # Python path contrib
     - files.yml   # Proto files config
     - python.yml  # Code generation for Python
+    - badges.yml  # Badges generation
 
 # Extra config
 config:
