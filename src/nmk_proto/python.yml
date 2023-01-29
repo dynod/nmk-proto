@@ -82,7 +82,8 @@ tasks:
         emoji: ":pencil:.:magnifying_glass_tilted_left:"
         appendToDeps:
             - tests
-        if: ${pythonGeneratedSrcFiles}   # Only if python generated files are expected
+        if: ${pythonGeneratedSrcFiles}  # Only if python generated files are expected
+        unless: ${protoDisableCheck}    # Only if not disabled by variable
         builder: nmk_proto.python.ProtoPythonChecker
         params:
             src_folders: ${protoPythonSrcFolders}
