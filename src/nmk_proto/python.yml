@@ -56,7 +56,7 @@ tasks:
         builder: nmk_proto.python.ProtoLinkBuilder
 
     # Generate Python files
-    proto.python:
+    proto.gen.py:
         description: Generate python code
         emoji: ":pencil:.:snake:"
         deps:
@@ -75,3 +75,14 @@ tasks:
         builder: nmk_proto.python.ProtoPythonBuilder
         params:
             init_template: ${protoPythonGeneratedInitTemplate}
+
+    # Verify generated python files
+    proto.check.py:
+        description: Check generated python code
+        emoji: ":pencil:.:magnifying_glass_tilted_left:"
+        appendToDeps:
+            - tests
+        if: ${pythonGeneratedSrcFiles}   # Only if python generated files are expected
+        builder: nmk_proto.python.ProtoPythonChecker
+        params:
+            src_folders: ${protoPythonSrcFolders}

@@ -1,3 +1,4 @@
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -12,6 +13,8 @@ from nmk.utils import create_dir_symlink, run_with_logs
 from nmk_base.common import TemplateBuilder
 
 from nmk_proto.utils import get_input_all_sub_folders, get_input_unique_sub_folders, get_proto_folder, get_proto_paths_options
+
+ERROR_LINE_PATTERN = re.compile("^([^ ]+Error: )(.*)")
 
 
 # Grab some config items
@@ -129,6 +132,18 @@ class ProtoPythonBuilder(TemplateBuilder):
         for candidate in [p.relative_to(target_src) for p in filter(lambda f: f.name.endswith("_pb2.py"), self.outputs)]:
             importable_files[candidate.parent].append(candidate.as_posix()[: -len(candidate.suffix)].replace("/", "."))
 
-        # Generate init files
+        # Browse importable packages
         for p, modules in importable_files.items():
+            # Generate init file
             self.build_from_template(Path(init_template), target_src / p / "__init__.py", {"modules": modules})
+
+
+class ProtoPythonChecker(NmkTaskBuilder):
+    def build(self, src_folders: List[Path]):
+        target_src = get_python_src_folder(self.model)
+        for p in src_folders:
+            # Try to import, to verify any name overlap
+            cp = run_with_logs([sys.executable, "-c", f"from {p.relative_to(target_src).as_posix().replace('/','.')} import *"], check=False)
+            if cp.returncode != 0:
+                # Just print meaningfull error
+                raise AssertionError(next(filter(lambda m: m is not None, map(ERROR_LINE_PATTERN.match, cp.stderr.splitlines()))).group(2))
