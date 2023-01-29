@@ -3,6 +3,7 @@ import shutil
 from configparser import ConfigParser
 from pathlib import Path
 
+import pytest
 from nmk.tests.tester import NmkBaseTester
 
 
@@ -103,45 +104,33 @@ class TestProtoPlugin(NmkBaseTester):
         (self.test_folder / "protos" / "sample.proto").touch()
         self.nmk(project, extra_args=["py.format"])
 
-    def test_check_python_failed(self):
+    @pytest.fixture
+    def with_chdir(self):
         # Change directory to generated project one
         path_to_restore = os.getcwd()
         os.chdir(self.test_folder)
-        to_raise = None
-        try:
-            # Generate python code from proto
-            prj = self.prepare_proto_project("python_ko", extra_proto=self.target_proto2("sample_module_ko"), module_name="sample_module_ko")
-            self.nmk(
-                prj,
-                extra_args=["tests"],
-                expected_rc=1,
-                expected_error="An error occurred during task proto.check.py build: Couldn't build proto file into descriptor pool: duplicate symbol 'FOO'",
-            )
 
-        except AssertionError as e:
-            to_raise = e
+        # Yield to test
+        yield
 
-        finally:
-            # Restore original directory
-            os.chdir(path_to_restore)
-            if to_raise is not None:
-                raise to_raise
+        # Restore previous directory
+        os.chdir(path_to_restore)
 
-    def test_check_python_ok(self):
-        # Change directory to generated project one
-        path_to_restore = os.getcwd()
-        os.chdir(self.test_folder)
-        to_raise = None
-        try:
-            # Generate python code from proto
-            prj = self.prepare_proto_project("python_ok", module_name="sample_module_ok")
-            self.nmk(prj, extra_args=["tests"])
+    def test_check_python_failed(self, with_chdir):
+        # Generate python code from proto
+        prj = self.prepare_proto_project("python_ko", extra_proto=self.target_proto2("sample_module_ko"), module_name="sample_module_ko")
+        self.nmk(
+            prj,
+            extra_args=["tests"],
+            expected_rc=1,
+            expected_error="An error occurred during task proto.check.py build: Couldn't build proto file into descriptor pool: duplicate symbol 'FOO'",
+        )
 
-        except AssertionError as e:
-            to_raise = e
+        # Retry with disabled check
+        self.nmk(prj, extra_args=["proto.check.py", "--config", '{"protoDisableCheck":true}'])
+        self.check_logs("/[proto.check.py]] DEBUG 🐛 - Task skipped, nothing to do")
 
-        finally:
-            # Restore original directory
-            os.chdir(path_to_restore)
-            if to_raise is not None:
-                raise to_raise
+    def test_check_python_ok(self, with_chdir):
+        # Generate python code from proto
+        prj = self.prepare_proto_project("python_ok", module_name="sample_module_ok")
+        self.nmk(prj, extra_args=["tests"])
