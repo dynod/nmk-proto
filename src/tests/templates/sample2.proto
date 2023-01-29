@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+enum AnotherTestEnum {
+    FOO = 0;
+    BAR = 1;
+}

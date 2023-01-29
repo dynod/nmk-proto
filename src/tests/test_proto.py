@@ -1,3 +1,4 @@
+import os
 import shutil
 from configparser import ConfigParser
 from pathlib import Path
@@ -10,14 +11,21 @@ class TestProtoPlugin(NmkBaseTester):
     def templates_root(self) -> Path:
         return Path(__file__).parent / "templates"
 
-    @property
-    def target_proto(self) -> Path:
-        return self.test_folder / "protos" / "sample_module" / "api" / "sample.proto"
+    def target_proto_folder(self, module_name: str = None) -> Path:
+        return self.test_folder / "protos" / ((Path("sample_module") / "api") if module_name is None else module_name)
 
-    def prepare_proto_project(self, other_plugin: str = None) -> Path:
+    def target_proto(self, module_name: str = None) -> Path:
+        return self.target_proto_folder(module_name) / "sample.proto"
+
+    def target_proto2(self, module_name: str = None) -> Path:
+        return self.target_proto_folder(module_name) / "sample2.proto"
+
+    def prepare_proto_project(self, other_plugin: str = None, extra_proto: Path = None, module_name: str = None) -> Path:
         # Build a sample project with proto files
-        self.target_proto.parent.mkdir(exist_ok=True, parents=True)
-        shutil.copyfile(self.template("sample.proto"), self.target_proto)
+        self.target_proto_folder(module_name).mkdir(exist_ok=True, parents=True)
+        shutil.copyfile(self.template(self.target_proto(module_name).name), self.target_proto(module_name))
+        if extra_proto is not None:
+            shutil.copyfile(self.template(extra_proto.name), extra_proto)
         return self.prepare_project(f"ref_proto{('_'+other_plugin) if other_plugin is not None else ''}.yml")
 
     def escape(self, to_escape: Path) -> str:
@@ -31,7 +39,7 @@ class TestProtoPlugin(NmkBaseTester):
         # Check found proto files
         self.nmk(self.prepare_proto_project(), extra_args=["--print", "protoInputFiles", "--print", "protoAllInputSubDirs"])
         self.check_logs(
-            f'{{ "protoInputFiles": [ {self.escape(self.target_proto)} ], "protoAllInputSubDirs": [ {self.escape(Path("sample_module")/"api")} ] }}'
+            f'{{ "protoInputFiles": [ {self.escape(self.target_proto())} ], "protoAllInputSubDirs": [ {self.escape(Path("sample_module")/"api")} ] }}'
         )
 
     def test_vscode_settings(self):
@@ -89,8 +97,51 @@ class TestProtoPlugin(NmkBaseTester):
 
         # Test incremental build
         self.nmk(project, extra_args=["py.format"])
-        self.check_logs(["[proto.python]] DEBUG 🐛 - Task skipped, nothing to do", "[py.format]] DEBUG 🐛 - Task skipped, nothing to do"])
+        self.check_logs(["[proto.gen.py]] DEBUG 🐛 - Task skipped, nothing to do", "[py.format]] DEBUG 🐛 - Task skipped, nothing to do"])
 
         # Test rebuild after proto file touch
         (self.test_folder / "protos" / "sample.proto").touch()
         self.nmk(project, extra_args=["py.format"])
+
+    def test_check_python_failed(self):
+        # Change directory to generated project one
+        path_to_restore = os.getcwd()
+        os.chdir(self.test_folder)
+        to_raise = None
+        try:
+            # Generate python code from proto
+            prj = self.prepare_proto_project("python_ko", extra_proto=self.target_proto2("sample_module_ko"), module_name="sample_module_ko")
+            self.nmk(
+                prj,
+                extra_args=["tests"],
+                expected_rc=1,
+                expected_error="An error occurred during task proto.check.py build: Couldn't build proto file into descriptor pool: duplicate symbol 'FOO'",
+            )
+
+        except AssertionError as e:
+            to_raise = e
+
+        finally:
+            # Restore original directory
+            os.chdir(path_to_restore)
+            if to_raise is not None:
+                raise to_raise
+
+    def test_check_python_ok(self):
+        # Change directory to generated project one
+        path_to_restore = os.getcwd()
+        os.chdir(self.test_folder)
+        to_raise = None
+        try:
+            # Generate python code from proto
+            prj = self.prepare_proto_project("python_ok", module_name="sample_module_ok")
+            self.nmk(prj, extra_args=["tests"])
+
+        except AssertionError as e:
+            to_raise = e
+
+        finally:
+            # Restore original directory
+            os.chdir(path_to_restore)
+            if to_raise is not None:
+                raise to_raise
