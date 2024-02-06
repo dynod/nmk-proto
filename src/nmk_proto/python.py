@@ -118,6 +118,8 @@ class ProtoPythonBuilder(TemplateBuilder):
                 + [
                     "--python_out",
                     str(target_src),
+                    "--pyi_out",
+                    str(target_src),
                     "--grpc_python_out",
                     str(target_src),
                     str(proto_file),

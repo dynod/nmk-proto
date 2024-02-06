@@ -1,6 +1,10 @@
 syntax = "proto3";
 
+/* Some test enum for code generation.
+
+   This is a documentation on several lines
+*/
 enum TestEnum {
-    FOO = 0;
-    BAR = 1;
+    FOO = 0;    // Foo enum value, representing foo
+    BAR = 1;    // Bar enum value, representing foo
 }

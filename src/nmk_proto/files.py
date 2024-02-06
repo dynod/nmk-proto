@@ -40,5 +40,5 @@ class ProtoPathOptionsBuilder(NmkListConfigResolver):
         # Return a list of protoc path options
         out = []
         for p in map(self.make_relative, [get_proto_folder(self.model)] + get_proto_deps(self.model)):
-            out.extend(["--proto_path", str(p)])
+            out.extend(["--proto_path", p.as_posix()])
         return out
