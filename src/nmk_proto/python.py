@@ -145,7 +145,7 @@ class ProtoPythonChecker(NmkTaskBuilder):
         target_src = get_python_src_folder(self.model)
         for p in src_folders:
             # Try to import, to verify any name overlap
-            cp = run_with_logs([sys.executable, "-c", f"from {p.relative_to(target_src).as_posix().replace('/','.')} import *"], check=False)
+            cp = run_with_logs([sys.executable, "-c", f"from {p.relative_to(target_src).as_posix().replace('/', '.')} import *"], check=False)
             if cp.returncode != 0:
                 # Just print meaningfull error
                 raise AssertionError(next(filter(lambda m: m is not None, map(ERROR_LINE_PATTERN.match, cp.stderr.splitlines()))).group(2))
