@@ -27,7 +27,7 @@ class TestProtoPlugin(NmkBaseTester):
         shutil.copyfile(self.template(self.target_proto(module_name).name), self.target_proto(module_name))
         if extra_proto is not None:
             shutil.copyfile(self.template(extra_proto.name), extra_proto)
-        return self.prepare_project(f"ref_proto{('_'+other_plugin) if other_plugin is not None else ''}.yml")
+        return self.prepare_project(f"ref_proto{('_' + other_plugin) if other_plugin is not None else ''}.yml")
 
     def escape(self, to_escape: Path) -> str:
         # Escape backslashes (for Windows paths in json print)
@@ -40,7 +40,7 @@ class TestProtoPlugin(NmkBaseTester):
         # Check found proto files
         self.nmk(self.prepare_proto_project(), extra_args=["--print", "protoInputFiles", "--print", "protoAllInputSubDirs"])
         self.check_logs(
-            f'{{ "protoInputFiles": [ {self.escape(self.target_proto())} ], "protoAllInputSubDirs": [ {self.escape(Path("sample_module")/"api")} ] }}'
+            f'{{ "protoInputFiles": [ {self.escape(self.target_proto())} ], "protoAllInputSubDirs": [ {self.escape(Path("sample_module") / "api")} ] }}'
         )
 
     def test_vscode_settings(self):
@@ -65,8 +65,8 @@ class TestProtoPlugin(NmkBaseTester):
         )
         src_path = self.test_folder / "src" / "sample_module" / "api"
         self.check_logs(
-            f'{{ "pythonGeneratedSrcFiles": [ {self.escape(src_path/"sample_pb2.py")}, {self.escape(src_path/"sample_pb2_grpc.py")}, {self.escape(src_path/"__init__.py")} ], '
-            + f'"protoPythonCopiedFiles": [ {self.escape(src_path/"sample.proto")} ], '
+            f'{{ "pythonGeneratedSrcFiles": [ {self.escape(src_path / "sample_pb2.py")}, {self.escape(src_path / "sample_pb2_grpc.py")}, {self.escape(src_path / "__init__.py")} ], '
+            + f'"protoPythonCopiedFiles": [ {self.escape(src_path / "sample.proto")} ], '
             + f'"protoPythonSrcFolders": [ {self.escape(src_path)} ] }}'
         )
 
