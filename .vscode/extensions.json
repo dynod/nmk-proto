@@ -4,6 +4,7 @@
         "ms-python.black-formatter",
         "ms-python.flake8",
         "ms-python.python",
+        "ms-vscode.live-server",
         "zxh404.vscode-proto3",
         "eamodio.gitlens",
         "streetsidesoftware.code-spell-checker"

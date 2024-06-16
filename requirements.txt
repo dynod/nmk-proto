@@ -18,6 +18,7 @@ grpcio
 grpcio-tools
 isort
 Jinja2
+myst-parser
 nmk-base
 nmk-vscode
 pep8-naming
@@ -26,6 +27,9 @@ pytest-cov
 pytest-multilog
 pytest-xdist
 setuptools
+sphinx
+sphinx-autoapi
+sphinx_rtd_theme
 wheel
 
 
