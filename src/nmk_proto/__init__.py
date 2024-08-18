@@ -1,3 +1,7 @@
+"""
+Python module for **nmk-proto** plugin code.
+"""
+
 from configparser import ConfigParser
 from pathlib import Path
 
@@ -19,5 +23,14 @@ except DistributionNotFound:  # pragma: no cover
 
 
 class NmkProtoVersionResolver(VersionResolver):
+    """
+    Version resolver for **${nmkProtoPluginVersion}**
+    """
+
     def get_version(self) -> str:
+        """
+        Module version accessor
+
+        :return: current module version
+        """
         return __version__

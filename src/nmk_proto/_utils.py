@@ -19,7 +19,7 @@ def get_input_all_sub_folders(model: NmkModel) -> List[Path]:
     return model.config["protoAllInputSubDirs"].value
 
 
-# Get input sub-folders (unique occurence filter)
+# Get input sub-folders (unique occurrence filter)
 def get_input_unique_sub_folders(model: NmkModel) -> List[Path]:
     return model.config["protoUniqueInputSubDirs"].value
 

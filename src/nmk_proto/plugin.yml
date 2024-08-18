@@ -18,7 +18,7 @@ config:
 
     # Plugin help links dict
     nmkPluginsDocs:
-        nmk-proto: https://github.com/dynod/nmk/wiki/nmk-proto-plugin
+        nmk-proto: https://nmk-proto.readthedocs.io/
 
     # Additional tools for code generation
     venvPkgDeps:
