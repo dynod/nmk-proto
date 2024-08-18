@@ -1,3 +1,7 @@
+"""
+Python related resolvers and builders sub-module
+"""
+
 import re
 import shutil
 import sys
@@ -12,38 +16,60 @@ from nmk.model.resolver import NmkListConfigResolver
 from nmk.utils import create_dir_symlink, run_with_logs
 from nmk_base.common import TemplateBuilder
 
-from nmk_proto.utils import get_input_all_sub_folders, get_input_unique_sub_folders, get_proto_folder, get_proto_paths_options
+from nmk_proto._utils import get_input_all_sub_folders, get_input_unique_sub_folders, get_proto_folder, get_proto_paths_options
 
-ERROR_LINE_PATTERN = re.compile("^([^ ]+Error: )(.*)")
+_ERROR_LINE_PATTERN = re.compile("^([^ ]+Error: )(.*)")
 
 
 # Grab some config items
-def get_python_src_folder(model: NmkModel) -> Path:
+def _get_python_src_folder(model: NmkModel) -> Path:
     return Path(model.config["pythonSrcFolders"].value[0])
 
 
-def get_python_out_folders(model: NmkModel) -> List[Path]:
+def _get_python_out_folders(model: NmkModel) -> List[Path]:
     return model.config["protoPythonSrcFolders"].value
 
 
 class OutputFoldersFinder(NmkListConfigResolver):
+    """
+    Generated python module folders resolver
+    """
+
     def get_value(self, name: str) -> List[Path]:
+        """
+        List all generated python module folders
+
+        :param name: config item name
+        :return: list of generated python module folders
+        """
+
         # Do we have a python source folder?
         if "pythonSrcFolders" in self.model.config:
             # Grab some variables values
-            target_src = get_python_src_folder(self.model)
+            target_src = _get_python_src_folder(self.model)
             return [target_src / p for p in get_input_unique_sub_folders(self.model)]
         else:
             return []
 
 
 class OutputPythonFilesFinder(NmkListConfigResolver):
+    """
+    Generated python files resolver
+    """
+
     def get_value(self, name: str) -> List[Path]:
+        """
+        List all generated python files names
+
+        :param name: config item name
+        :return: list of generated files names
+        """
+
         # Do we have python output folders
-        output_folders = get_python_out_folders(self.model)
+        output_folders = _get_python_out_folders(self.model)
         if len(output_folders):
             # Grab some variables values
-            target_src, proto_src = (get_python_src_folder(self.model), get_proto_folder(self.model))
+            target_src, proto_src = (_get_python_src_folder(self.model), get_proto_folder(self.model))
 
             # Convert source proto file names to python ones
             return [
@@ -56,12 +82,23 @@ class OutputPythonFilesFinder(NmkListConfigResolver):
 
 
 class OutputProtoFilesFinder(NmkListConfigResolver):
+    """
+    Copied proto files resolver
+    """
+
     def get_value(self, name: str) -> List[Path]:
+        """
+        List all names of proto files copied in python source directory
+
+        :param name: config item name
+        :return: list of copied proto files names
+        """
+
         # Do we have python output folders
-        output_folders = get_python_out_folders(self.model)
+        output_folders = _get_python_out_folders(self.model)
         if len(output_folders):
             # Grab some variables values
-            target_src, proto_src = (get_python_src_folder(self.model), get_proto_folder(self.model))
+            target_src, proto_src = (_get_python_src_folder(self.model), get_proto_folder(self.model))
 
             # Copied proto file in python folder
             return [target_src / p_file for p_file in [Path(p).relative_to(proto_src) for p in self.model.config["protoInputFiles"].value]]
@@ -70,13 +107,32 @@ class OutputProtoFilesFinder(NmkListConfigResolver):
 
 
 class OutputFoldersFinderWithWildcard(OutputFoldersFinder):
+    """
+    Generated python module wildcards resolver
+    """
+
     def get_value(self, name: str) -> List[Path]:
+        """
+        List all generated python module folders, with appended '/*' wildcard
+
+        :param name: config item name
+        :return: list of generated python module wildcards
+        """
+
         # Same than parent, with a "*" wildcard
         return [p / "*" for p in super().get_value(name)]
 
 
 class ProtoLinkBuilder(NmkTaskBuilder):
+    """
+    proto.link silent task builder
+    """
+
     def build(self):
+        """
+        Create local project symbolic link to venv root
+        """
+
         # Only if link is not created yet
         if not self.main_output.exists():
             # Source path
@@ -90,14 +146,27 @@ class ProtoLinkBuilder(NmkTaskBuilder):
 
 
 class ProtoPythonBuilder(TemplateBuilder):
-    def make_absolute(self, option: str) -> Path:
+    """
+    proto.gen.py task builder
+    """
+
+    def _make_absolute(self, option: str) -> Path:
         if not option.startswith("--") and not Path(option).is_absolute():
             return str(Path(self.model.config[NmkRootConfig.PROJECT_DIR].value) / option)
         return option
 
     def build(self, init_template: str):
+        """
+        Generate python files from input proto ones
+
+        Iterates on input proto files, and call protoc tool to generate python files.
+        Also generate __init__.py files for all generated modules, from provided template.
+
+        :param init_template: path to __init__.py file template
+        """
+
         # Grab some config items
-        target_src, out_folders, sub_folders = (get_python_src_folder(self.model), get_python_out_folders(self.model), get_input_all_sub_folders(self.model))
+        target_src, out_folders, sub_folders = (_get_python_src_folder(self.model), _get_python_out_folders(self.model), get_input_all_sub_folders(self.model))
 
         # Clean and re-create target folders
         for output_dir in out_folders:
@@ -107,7 +176,7 @@ class ProtoPythonBuilder(TemplateBuilder):
             candidate_dir.mkdir(parents=True, exist_ok=True)
 
         # Build proto paths list
-        proto_paths = [self.make_absolute(o) for o in get_proto_paths_options(self.model)]
+        proto_paths = [self._make_absolute(o) for o in get_proto_paths_options(self.model)]
 
         # Iterate on inputs (proto files)
         for proto_file, target_subdir in zip(self.inputs, sub_folders):
@@ -141,11 +210,24 @@ class ProtoPythonBuilder(TemplateBuilder):
 
 
 class ProtoPythonChecker(NmkTaskBuilder):
+    """
+    proto.check.py task builder
+    """
+
     def build(self, src_folders: List[Path]):
-        target_src = get_python_src_folder(self.model)
+        """
+        Check generated python files import
+
+        Verifies (for all generated python modules folders) that importing all generated
+        files at once works well (typically to make sure there are no enum naming conflicts).
+
+        :param src_folders: list of python module folders to be checked
+        """
+
+        target_src = _get_python_src_folder(self.model)
         for p in src_folders:
             # Try to import, to verify any name overlap
             cp = run_with_logs([sys.executable, "-c", f"from {p.relative_to(target_src).as_posix().replace('/', '.')} import *"], check=False)
             if cp.returncode != 0:
                 # Just print meaningfull error
-                raise AssertionError(next(filter(lambda m: m is not None, map(ERROR_LINE_PATTERN.match, cp.stderr.splitlines()))).group(2))
+                raise AssertionError(next(filter(lambda m: m is not None, map(_ERROR_LINE_PATTERN.match, cp.stderr.splitlines()))).group(2))

@@ -28,6 +28,7 @@
         "sdist",
         "venv",
         "loadme",
+        "rtype",
         "proto",
         "protos",
         "protoc",
