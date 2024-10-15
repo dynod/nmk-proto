@@ -27,18 +27,17 @@ config:
     gitIgnoredFiles:
         - ${protoPythonSrcFolders}
 
-    # flake8 + coverage: ignore generated files
-    pythonSetupItems:
-        flake8:
-            exclude:
-                - ${protoPythonSrcFolders}
-        run:
-            omit:
-                - ${protoPythonSrcFoldersWildcard}
-
-    # Embed proto files in python package
-    pythonSetupCfgFiles:
-        - ${BASEDIR}/templates/python_package_data.cfg.jinja
+    # ruff + coverage: ignore generated files
+    pythonProjectFileItems:
+        tool:
+            ruff:
+                lint:
+                    exclude:
+                        - ${protoPythonSrcFolders}
+            coverage:
+                run:
+                    omit:
+                        - ${protoPythonSrcFoldersWildcard}
 
     # Add GRPC dependencies to generated package
     pythonPackageRequirements:

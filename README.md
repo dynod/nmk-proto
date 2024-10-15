@@ -7,8 +7,8 @@ proto code generation plugin for **`nmk`** build system
 [![Issues](https://img.shields.io/github/issues-search/dynod/nmk?label=issues&query=is%3Aopen+is%3Aissue+label%3Aplugin%3Aproto)](https://github.com/dynod/nmk/issues?q=is%3Aopen+is%3Aissue+label%3Aplugin%3Aproto)
 [![Supported python versions](https://img.shields.io/badge/python-3.8%20--%203.12-blue)](https://www.python.org/)
 [![PyPI](https://img.shields.io/pypi/v/nmk-proto)](https://pypi.org/project/nmk-proto/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Flake8 analysis result](https://img.shields.io/badge/flake8-0-green)](https://flake8.pycqa.org/)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://astral.sh/ruff)
+[![Ruff analysis result](https://img.shields.io/badge/ruff-0-green)](https://astral.sh/ruff)
 [![Code coverage](https://img.shields.io/codecov/c/github/dynod/nmk-proto)](https://app.codecov.io/gh/dynod/nmk-proto)
 [![Documentation Status](https://readthedocs.org/projects/nmk-proto/badge/?version=stable)](https://nmk-proto.readthedocs.io/)
 <!-- NMK-BADGES-END -->
