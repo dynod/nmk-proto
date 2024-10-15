@@ -13,6 +13,6 @@ Generated source code folders (i.e. **{ref}`${protoPythonSrcFolders}<protoPython
 ## Python project settings
 
 For python projects, these items are automatically added:
-* **`pythonSetupItems`** item: to disable flake8 analysis and coverage on generated code
-* **`pythonSetupCfgFiles`** item: to embed generated proto files in generated python wheel (for usage as dependencies by other nmk projects)
-* **`pythonPackageRequirements`** item: add **grpcio** and **protobuf** dependencies to the generated python wheel
+* [**`pythonProjectFileItems`**](https://nmk-python.readthedocs.io/en/stable/extend.html#tests) item: to disable analysis and coverage on generated code
+* [**`pythonPackageRequirements`**](https://nmk-python.readthedocs.io/en/stable/extend.html#build) item: add **grpcio** and **protobuf** dependencies to the generated python wheel
+* [**`pythonGeneratedSrcFiles`**](https://nmk-python.readthedocs.io/en/stable/extend.html#files) item: add generated python sources files

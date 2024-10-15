@@ -27,7 +27,7 @@ def _get_python_src_folder(model: NmkModel) -> Path:
 
 
 def _get_python_out_folders(model: NmkModel) -> List[Path]:
-    return model.config["protoPythonSrcFolders"].value
+    return list(map(Path, model.config["protoPythonSrcFolders"].value))
 
 
 class OutputFoldersFinder(NmkListConfigResolver):
@@ -35,7 +35,7 @@ class OutputFoldersFinder(NmkListConfigResolver):
     Generated python module folders resolver
     """
 
-    def get_value(self, name: str) -> List[Path]:
+    def get_value(self, name: str) -> List[str]:
         """
         List all generated python module folders
 
@@ -47,7 +47,7 @@ class OutputFoldersFinder(NmkListConfigResolver):
         if "pythonSrcFolders" in self.model.config:
             # Grab some variables values
             target_src = _get_python_src_folder(self.model)
-            return [target_src / p for p in get_input_unique_sub_folders(self.model)]
+            return [str(target_src / p) for p in get_input_unique_sub_folders(self.model)]
         else:
             return []
 
@@ -57,7 +57,7 @@ class OutputPythonFilesFinder(NmkListConfigResolver):
     Generated python files resolver
     """
 
-    def get_value(self, name: str) -> List[Path]:
+    def get_value(self, name: str) -> List[str]:
         """
         List all generated python files names
 
@@ -73,10 +73,10 @@ class OutputPythonFilesFinder(NmkListConfigResolver):
 
             # Convert source proto file names to python ones
             return [
-                target_src / f"{str(p_file)[:-len(p_file.suffix)]}{suffix}.py"
+                str(target_src / f"{str(p_file)[:-len(p_file.suffix)]}{suffix}.py")
                 for p_file in [Path(p).relative_to(proto_src) for p in self.model.config["protoInputFiles"].value]
                 for suffix in ["_pb2", "_pb2_grpc"]
-            ] + [p / "__init__.py" for p in output_folders]
+            ] + [str(p / "__init__.py") for p in output_folders]
         else:
             return []
 
@@ -86,7 +86,7 @@ class OutputProtoFilesFinder(NmkListConfigResolver):
     Copied proto files resolver
     """
 
-    def get_value(self, name: str) -> List[Path]:
+    def get_value(self, name: str) -> List[str]:
         """
         List all names of proto files copied in python source directory
 
@@ -101,7 +101,7 @@ class OutputProtoFilesFinder(NmkListConfigResolver):
             target_src, proto_src = (_get_python_src_folder(self.model), get_proto_folder(self.model))
 
             # Copied proto file in python folder
-            return [target_src / p_file for p_file in [Path(p).relative_to(proto_src) for p in self.model.config["protoInputFiles"].value]]
+            return [str(target_src / p_file) for p_file in [Path(p).relative_to(proto_src) for p in self.model.config["protoInputFiles"].value]]
         else:
             return []
 
@@ -111,7 +111,7 @@ class OutputFoldersFinderWithWildcard(OutputFoldersFinder):
     Generated python module wildcards resolver
     """
 
-    def get_value(self, name: str) -> List[Path]:
+    def get_value(self, name: str) -> List[str]:
         """
         List all generated python module folders, with appended '/*' wildcard
 
@@ -120,7 +120,7 @@ class OutputFoldersFinderWithWildcard(OutputFoldersFinder):
         """
 
         # Same than parent, with a "*" wildcard
-        return [p / "*" for p in super().get_value(name)]
+        return [f"{p}/*" for p in super().get_value(name)]
 
 
 class ProtoLinkBuilder(NmkTaskBuilder):
@@ -214,7 +214,7 @@ class ProtoPythonChecker(NmkTaskBuilder):
     proto.check.py task builder
     """
 
-    def build(self, src_folders: List[Path]):
+    def build(self, src_folders: List[str]):
         """
         Check generated python files import
 
@@ -225,7 +225,7 @@ class ProtoPythonChecker(NmkTaskBuilder):
         """
 
         target_src = _get_python_src_folder(self.model)
-        for p in src_folders:
+        for p in map(Path, src_folders):
             # Try to import, to verify any name overlap
             cp = run_with_logs([sys.executable, "-c", f"from {p.relative_to(target_src).as_posix().replace('/', '.')} import *"], check=False)
             if cp.returncode != 0:

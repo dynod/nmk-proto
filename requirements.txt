@@ -6,26 +6,18 @@
 # Package dependencies from nmk project files
 #
 
-black
-flake8
-flake8-blind-except
-flake8-bugbear
-flake8-builtins
-flake8-comprehensions
-flake8-pep3101
-flake8-string-format
+build
 grpcio
 grpcio-tools
-isort
 Jinja2
 myst-parser
 nmk-base
 nmk-vscode
-pep8-naming
 protobuf
 pytest-cov
 pytest-multilog
 pytest-xdist
+ruff
 setuptools
 sphinx
 sphinx-autoapi

@@ -1,6 +1,5 @@
 import os
 import shutil
-from configparser import ConfigParser
 from pathlib import Path
 
 import pytest
@@ -83,15 +82,6 @@ class TestProtoPlugin(NmkBaseTester):
         assert git_ignore.is_file()
         with git_ignore.open() as f:
             assert "src/sample_module/api" in f.read()
-
-        # Test generated setup file
-        setup = self.test_folder / "setup.cfg"
-        assert setup.is_file()
-        setup_config = ConfigParser()
-        setup_config.read(setup)
-        assert "src/sample_module/api" in setup_config["flake8"]["exclude"].split("\n")
-        assert "src/sample_module/api/*" in setup_config["run"]["omit"].split("\n")
-        assert "*.proto" == setup_config["options.package_data"]["sample_module.api"]
 
         # Test link to installed venv packages
         assert (self.test_folder / ".nmk" / "protos").exists()
