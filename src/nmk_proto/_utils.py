@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from nmk.model.model import NmkModel
 
@@ -10,25 +9,25 @@ def get_proto_folder(model: NmkModel) -> Path:
 
 
 # Get input files
-def get_input_proto_files(model: NmkModel) -> List[Path]:
+def get_input_proto_files(model: NmkModel) -> list[Path]:
     return model.config["protoInputFiles"].value
 
 
 # Get input sub-folders (all)
-def get_input_all_sub_folders(model: NmkModel) -> List[Path]:
+def get_input_all_sub_folders(model: NmkModel) -> list[Path]:
     return model.config["protoAllInputSubDirs"].value
 
 
 # Get input sub-folders (unique occurrence filter)
-def get_input_unique_sub_folders(model: NmkModel) -> List[Path]:
+def get_input_unique_sub_folders(model: NmkModel) -> list[Path]:
     return model.config["protoUniqueInputSubDirs"].value
 
 
 # Get declared proto folders dependencies
-def get_proto_deps(model: NmkModel) -> List[str]:
+def get_proto_deps(model: NmkModel) -> list[str]:
     return [Path(p) for p in model.config["protoDeps"].value]
 
 
 # Get generated proto paths options
-def get_proto_paths_options(model: NmkModel) -> List[str]:
+def get_proto_paths_options(model: NmkModel) -> list[str]:
     return model.config["protoPathOptions"].value

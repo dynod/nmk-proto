@@ -8,7 +8,7 @@ refs:
     - src/nmk_proto/plugin.yml
     - <workspace>/shared.yml
     - workspace:
-        local: ../../../../shared
+        local: ../../shared
         remote: github://dynod/workspace/main/shared
 
 # Python path for locally defined tasks

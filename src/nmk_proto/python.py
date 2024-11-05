@@ -2,14 +2,13 @@
 Python related resolvers and builders sub-module
 """
 
+import importlib.resources
 import re
 import shutil
 import sys
 from pathlib import Path
-from typing import List
 
 from nmk.model.builder import NmkTaskBuilder
-from nmk.model.cache import venv_libs
 from nmk.model.keys import NmkRootConfig
 from nmk.model.model import NmkModel
 from nmk.model.resolver import NmkListConfigResolver
@@ -26,7 +25,7 @@ def _get_python_src_folder(model: NmkModel) -> Path:
     return Path(model.config["pythonSrcFolders"].value[0])
 
 
-def _get_python_out_folders(model: NmkModel) -> List[Path]:
+def _get_python_out_folders(model: NmkModel) -> list[Path]:
     return list(map(Path, model.config["protoPythonSrcFolders"].value))
 
 
@@ -35,7 +34,7 @@ class OutputFoldersFinder(NmkListConfigResolver):
     Generated python module folders resolver
     """
 
-    def get_value(self, name: str) -> List[str]:
+    def get_value(self, name: str) -> list[str]:
         """
         List all generated python module folders
 
@@ -57,7 +56,7 @@ class OutputPythonFilesFinder(NmkListConfigResolver):
     Generated python files resolver
     """
 
-    def get_value(self, name: str) -> List[str]:
+    def get_value(self, name: str) -> list[str]:
         """
         List all generated python files names
 
@@ -86,7 +85,7 @@ class OutputProtoFilesFinder(NmkListConfigResolver):
     Copied proto files resolver
     """
 
-    def get_value(self, name: str) -> List[str]:
+    def get_value(self, name: str) -> list[str]:
         """
         List all names of proto files copied in python source directory
 
@@ -111,7 +110,7 @@ class OutputFoldersFinderWithWildcard(OutputFoldersFinder):
     Generated python module wildcards resolver
     """
 
-    def get_value(self, name: str) -> List[str]:
+    def get_value(self, name: str) -> list[str]:
         """
         List all generated python module folders, with appended '/*' wildcard
 
@@ -135,8 +134,8 @@ class ProtoLinkBuilder(NmkTaskBuilder):
 
         # Only if link is not created yet
         if not self.main_output.exists():
-            # Source path
-            src_path = venv_libs()
+            # Source path: check for root folder of Jinja module
+            src_path = Path(importlib.resources.files("jinja2")).parent
 
             # Prepare output parent if not exists yet
             self.main_output.parent.mkdir(exist_ok=True, parents=True)
@@ -214,7 +213,7 @@ class ProtoPythonChecker(NmkTaskBuilder):
     proto.check.py task builder
     """
 
-    def build(self, src_folders: List[str]):
+    def build(self, src_folders: list[str]):
         """
         Check generated python files import
 

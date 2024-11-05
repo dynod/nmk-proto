@@ -3,7 +3,6 @@ File resolvers sub-module
 """
 
 from pathlib import Path
-from typing import List
 
 from nmk.model.keys import NmkRootConfig
 from nmk.model.resolver import NmkListConfigResolver
@@ -16,7 +15,7 @@ class ProtoFilesFinder(NmkListConfigResolver):
     Input proto files resolver
     """
 
-    def get_value(self, name: str) -> List[Path]:
+    def get_value(self, name: str) -> list[Path]:
         """
         List all proto files found in input folder
 
@@ -33,7 +32,7 @@ class ProtoAllSubDirsFinder(NmkListConfigResolver):
     Proto subfolders list resolver
     """
 
-    def get_value(self, name: str) -> List[Path]:
+    def get_value(self, name: str) -> list[Path]:
         """
         List all proto sub-folders (one per file)
 
@@ -50,7 +49,7 @@ class ProtoUniqueSubDirsFinder(NmkListConfigResolver):
     Proto subfolders set resolver
     """
 
-    def get_value(self, name: str) -> List[Path]:
+    def get_value(self, name: str) -> list[Path]:
         """
         List all proto sub-folders (no duplicates)
 
@@ -76,7 +75,7 @@ class ProtoPathOptionsBuilder(NmkListConfigResolver):
                 pass
         return p  # pragma: no cover
 
-    def get_value(self, name: str) -> List[str]:
+    def get_value(self, name: str) -> list[str]:
         """
         Build path options list for protoc command
 
