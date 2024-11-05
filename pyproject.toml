@@ -7,8 +7,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nmk-proto"
 dynamic = ["version"]
-requires-python = ">=3.8"
-classifiers = ["Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12"]
+requires-python = ">=3.9"
+classifiers = ["Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12"]
 dependencies = ["grpcio", "protobuf", "nmk-base", "Jinja2"]
 description = "Code generation plugin from proto files for nmk build system"
 
@@ -21,6 +21,14 @@ name = "The dynod project"
 [project.readme]
 file = "README.md"
 content-type = "text/markdown"
+
+[project.license]
+file = "LICENSE"
+
+[project.urls]
+Homepage = "https://github.com/dynod/nmk-proto"
+Repository = "https://github.com/dynod/nmk-proto"
+Issues = "https://github.com/dynod/nmk/issues?q=is%3Aopen+is%3Aissue+label%3Aplugin%3Aproto"
 
 [tool.setuptools.packages.find]
 where = ["src"]
