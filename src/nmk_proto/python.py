@@ -15,8 +15,6 @@ from nmk.model.resolver import NmkListConfigResolver
 from nmk.utils import create_dir_symlink, run_with_logs
 from nmk_base.common import TemplateBuilder
 
-from nmk_proto._utils import get_input_all_sub_folders, get_input_unique_sub_folders, get_proto_folder, get_proto_paths_options
-
 _ERROR_LINE_PATTERN = re.compile("^([^ ]+Error: )(.*)")
 
 
@@ -25,28 +23,35 @@ def _get_python_src_folder(model: NmkModel) -> Path:
     return Path(model.config["pythonSrcFolders"].value[0])
 
 
-def _get_python_out_folders(model: NmkModel) -> list[Path]:
-    return list(map(Path, model.config["protoPythonSrcFolders"].value))
-
-
 class OutputFoldersFinder(NmkListConfigResolver):
     """
     Generated python module folders resolver
     """
 
-    def get_value(self, name: str) -> list[str]:
+    def get_value(self, name: str, input_subdirs: list[str]) -> list[str]:
         """
         List all generated python module folders
 
         :param name: config item name
+        :param input_subdirs: list of unique input subdirs
         :return: list of generated python module folders
         """
 
         # Do we have a python source folder?
         if "pythonSrcFolders" in self.model.config:
-            # Grab some variables values
             target_src = _get_python_src_folder(self.model)
-            return [str(target_src / p) for p in get_input_unique_sub_folders(self.model)]
+
+            # Rework list to add intermediate (empty) python packages
+            whole_set = set()
+            for p in input_subdirs:
+                parts = list(Path(p).parts)
+                for i in range(1, len(parts) + 1):
+                    new_path = Path(*parts[:i])
+                    whole_set.add(new_path)
+            whole_list = sorted(list(whole_set))
+
+            # Return all folder relative to python folder
+            return [str(target_src / p) for p in whole_list]
         else:
             return []
 
@@ -56,26 +61,28 @@ class OutputPythonFilesFinder(NmkListConfigResolver):
     Generated python files resolver
     """
 
-    def get_value(self, name: str) -> list[str]:
+    def get_value(self, name: str, folder: str, input_files: list[str], src_folders: list[str]) -> list[str]:
         """
         List all generated python files names
 
         :param name: config item name
+        :param folder: root proto folder
+        :param input_files: list of all input proto files
+        :param src_folders: list of python generated source folders
         :return: list of generated files names
         """
 
         # Do we have python output folders
-        output_folders = _get_python_out_folders(self.model)
-        if len(output_folders):
+        if len(src_folders):
             # Grab some variables values
-            target_src, proto_src = (_get_python_src_folder(self.model), get_proto_folder(self.model))
+            target_src, proto_src = (_get_python_src_folder(self.model), Path(folder))
 
             # Convert source proto file names to python ones
             return [
                 str(target_src / f"{str(p_file)[:-len(p_file.suffix)]}{suffix}.py")
-                for p_file in [Path(p).relative_to(proto_src) for p in self.model.config["protoInputFiles"].value]
+                for p_file in [Path(p).relative_to(proto_src) for p in input_files]
                 for suffix in ["_pb2", "_pb2_grpc"]
-            ] + [str(p / "__init__.py") for p in output_folders]
+            ] + [str(Path(p) / "__init__.py") for p in src_folders]
         else:
             return []
 
@@ -85,22 +92,24 @@ class OutputProtoFilesFinder(NmkListConfigResolver):
     Copied proto files resolver
     """
 
-    def get_value(self, name: str) -> list[str]:
+    def get_value(self, name: str, folder: str, input_files: list[str], src_folders: list[str]) -> list[str]:
         """
         List all names of proto files copied in python source directory
 
         :param name: config item name
+        :param folder: root proto folder
+        :param input_files: list of all input proto files
+        :param src_folders: list of python generated source folders
         :return: list of copied proto files names
         """
 
         # Do we have python output folders
-        output_folders = _get_python_out_folders(self.model)
-        if len(output_folders):
+        if len(src_folders):
             # Grab some variables values
-            target_src, proto_src = (_get_python_src_folder(self.model), get_proto_folder(self.model))
+            target_src, proto_src = (_get_python_src_folder(self.model), Path(folder))
 
             # Copied proto file in python folder
-            return [str(target_src / p_file) for p_file in [Path(p).relative_to(proto_src) for p in self.model.config["protoInputFiles"].value]]
+            return [str(target_src / p_file) for p_file in [Path(p).relative_to(proto_src) for p in input_files]]
         else:
             return []
 
@@ -110,16 +119,17 @@ class OutputFoldersFinderWithWildcard(OutputFoldersFinder):
     Generated python module wildcards resolver
     """
 
-    def get_value(self, name: str) -> list[str]:
+    def get_value(self, name: str, input_subdirs: list[str]) -> list[str]:
         """
         List all generated python module folders, with appended '/*' wildcard
 
         :param name: config item name
+        :param input_subdirs: list of unique input subdirs
         :return: list of generated python module wildcards
         """
 
         # Same than parent, with a "*" wildcard
-        return [f"{p}/*" for p in super().get_value(name)]
+        return [f"{p}/*" for p in super().get_value(name, input_subdirs)]
 
 
 class ProtoLinkBuilder(NmkTaskBuilder):
@@ -154,7 +164,7 @@ class ProtoPythonBuilder(TemplateBuilder):
             return str(Path(self.model.config[NmkRootConfig.PROJECT_DIR].value) / option)
         return option
 
-    def build(self, init_template: str):
+    def build(self, init_template: str, all_input_subdirs: list[str], options: list[str], src_folders: list[str]):
         """
         Generate python files from input proto ones
 
@@ -162,20 +172,23 @@ class ProtoPythonBuilder(TemplateBuilder):
         Also generate __init__.py files for all generated modules, from provided template.
 
         :param init_template: path to __init__.py file template
+        :param all_input_subdirs: list of all input subdirs (one per found proto file)
+        :param options: list of proto paths options
+        :param src_folders: list of python generated source folders
         """
 
         # Grab some config items
-        target_src, out_folders, sub_folders = (_get_python_src_folder(self.model), _get_python_out_folders(self.model), get_input_all_sub_folders(self.model))
+        target_src, sub_folders = (_get_python_src_folder(self.model), all_input_subdirs)
 
         # Clean and re-create target folders
-        for output_dir in out_folders:
+        for output_dir in src_folders:
             candidate_dir = target_src / output_dir
             if candidate_dir.is_dir():
                 shutil.rmtree(candidate_dir)
             candidate_dir.mkdir(parents=True, exist_ok=True)
 
         # Build proto paths list
-        proto_paths = [self._make_absolute(o) for o in get_proto_paths_options(self.model)]
+        proto_paths = [self._make_absolute(o) for o in options]
 
         # Iterate on inputs (proto files)
         for proto_file, target_subdir in zip(self.inputs, sub_folders):
@@ -198,7 +211,7 @@ class ProtoPythonBuilder(TemplateBuilder):
             shutil.copyfile(proto_file, target_src / target_subdir / proto_file.name)
 
         # Reorder output files
-        importable_files = {out_folder.relative_to(target_src): [] for out_folder in out_folders}
+        importable_files = {Path(out_folder).relative_to(target_src): [] for out_folder in src_folders}
         for candidate in [p.relative_to(target_src) for p in filter(lambda f: f.name.endswith("_pb2.py"), self.outputs)]:
             importable_files[candidate.parent].append(candidate.as_posix()[: -len(candidate.suffix)].replace("/", "."))
 

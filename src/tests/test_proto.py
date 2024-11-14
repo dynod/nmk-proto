@@ -64,9 +64,9 @@ class TestProtoPlugin(NmkBaseTester):
         )
         src_path = self.test_folder / "src" / "sample_module" / "api"
         self.check_logs(
-            f'{{ "pythonGeneratedSrcFiles": [ {self.escape(src_path / "sample_pb2.py")}, {self.escape(src_path / "sample_pb2_grpc.py")}, {self.escape(src_path / "__init__.py")} ], '
+            f'{{ "pythonGeneratedSrcFiles": [ {self.escape(src_path / "sample_pb2.py")}, {self.escape(src_path / "sample_pb2_grpc.py")}, {self.escape(src_path.parent / "__init__.py")}, {self.escape(src_path / "__init__.py")} ], '
             + f'"protoPythonCopiedFiles": [ {self.escape(src_path / "sample.proto")} ], '
-            + f'"protoPythonSrcFolders": [ {self.escape(src_path)} ] }}'
+            + f'"protoPythonSrcFolders": [ {self.escape(src_path.parent)}, {self.escape(src_path)} ] }}'
         )
 
     def test_generate_python(self):
@@ -91,7 +91,7 @@ class TestProtoPlugin(NmkBaseTester):
         self.check_logs(["[proto.gen.py]] DEBUG 🐛 - Task skipped, nothing to do", "[py.format]] DEBUG 🐛 - Task skipped, nothing to do"])
 
         # Test rebuild after proto file touch
-        (self.test_folder / "protos" / "sample.proto").touch()
+        (self.test_folder / "protos" / "sample_module" / "api" / "sample.proto").touch()
         self.nmk(project, extra_args=["py.format"])
 
     @pytest.fixture
@@ -123,4 +123,17 @@ class TestProtoPlugin(NmkBaseTester):
     def test_check_python_ok(self, with_chdir):
         # Generate python code from proto
         prj = self.prepare_proto_project("python_ok", module_name="sample_module_ok")
+        self.nmk(prj, extra_args=["tests"])
+
+    def test_check_python_multiple(self, with_chdir):
+        # Build a sample project with multiple proto files folders
+        folder1 = self.target_proto_folder("sample_module/foo")
+        folder1.mkdir(exist_ok=True, parents=True)
+        shutil.copyfile(self.template("sample.proto"), folder1 / "sample.proto")
+        folder2 = self.target_proto_folder("sample_module/bar")
+        folder2.mkdir(exist_ok=True, parents=True)
+        shutil.copyfile(self.template("sample2.proto"), folder2 / "sample2.proto")
+        prj = self.prepare_project("ref_proto_python.yml")
+
+        # Check generated code
         self.nmk(prj, extra_args=["tests"])
