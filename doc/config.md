@@ -124,3 +124,12 @@ This is the path to the template used to generate `__init__.py` files in generat
 | str  | ${PROJECTDIR_NMK}/protos
 
 This is the path of the symbolic link to project venv, used for references to proto files provided by venv-installed packages.
+
+(protoPythonExtraArgs)=
+### **`protoPythonExtraArgs`** -- Extra arguments for python files generation
+
+| Type | Default value |
+|-     |-
+| list[str]  | []
+
+This is a list of extra arguments for python files generation with protoc command.

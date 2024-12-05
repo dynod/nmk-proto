@@ -25,6 +25,10 @@ The builder is called with the following parameters mapping:
 | Name | Value |
 |- |-
 | init_template | **{ref}`${protoPythonGeneratedInitTemplate}<protoPythonGeneratedInitTemplate>`**
+| all_input_subdirs | **{ref}`${protoAllInputSubDirs}<protoAllInputSubDirs>`**
+| options | **{ref}`${protoPathOptions}<protoPathOptions>`**
+| src_folders | **{ref}`${protoPythonSrcFolders}<protoPythonSrcFolders>`**
+| extra_args | **{ref}`${protoPythonExtraArgs}<protoPythonExtraArgs>`**
 
 ## Test tasks
 
