@@ -35,6 +35,9 @@ config:
     protoDeps:
         - ${protoPythonNmkRoot}
 
+    # Extra options for python files generation
+    protoPythonExtraArgs: []
+
     # git: ignore generated files
     gitIgnoredFiles:
         - ${protoPythonSrcFolders}
@@ -89,6 +92,7 @@ tasks:
             all_input_subdirs: ${protoAllInputSubDirs}
             options: ${protoPathOptions}
             src_folders: ${protoPythonSrcFolders}
+            extra_args: ${protoPythonExtraArgs}
 
     # Verify generated python files
     proto.check.py:

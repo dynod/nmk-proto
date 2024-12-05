@@ -164,7 +164,7 @@ class ProtoPythonBuilder(TemplateBuilder):
             return str(Path(self.model.config[NmkRootConfig.PROJECT_DIR].value) / option)
         return option
 
-    def build(self, init_template: str, all_input_subdirs: list[str], options: list[str], src_folders: list[str]):
+    def build(self, init_template: str, all_input_subdirs: list[str], options: list[str], src_folders: list[str], extra_args: list[str]):
         """
         Generate python files from input proto ones
 
@@ -175,6 +175,7 @@ class ProtoPythonBuilder(TemplateBuilder):
         :param all_input_subdirs: list of all input subdirs (one per found proto file)
         :param options: list of proto paths options
         :param src_folders: list of python generated source folders
+        :param extra_args: list of extra arguments for protoc command
         """
 
         # Grab some config items
@@ -196,15 +197,9 @@ class ProtoPythonBuilder(TemplateBuilder):
             run_with_logs(
                 [sys.executable, "-m", "grpc_tools.protoc"]
                 + proto_paths
-                + [
-                    "--python_out",
-                    str(target_src),
-                    "--pyi_out",
-                    str(target_src),
-                    "--grpc_python_out",
-                    str(target_src),
-                    str(proto_file),
-                ]
+                + ["--python_out", str(target_src), "--pyi_out", str(target_src), "--grpc_python_out", str(target_src)]
+                + extra_args
+                + [str(proto_file)]
             )
 
             # Also simply copy proto file to output

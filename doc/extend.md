@@ -11,3 +11,7 @@ Example:
 protoDeps:
     - /some/proto/path
 ```
+
+## extra protoc options
+
+**`nmk`** projects or plugins can extend the **{ref}`protoPythonExtraArgs<protoPythonExtraArgs>`** config item to provide extra arguments to protoc command.
