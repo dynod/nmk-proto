@@ -6,6 +6,7 @@ import pytest
 from nmk.tests.tester import NmkBaseTester
 
 
+@pytest.mark.usefixtures("clean_proto_link")
 class TestProtoPlugin(NmkBaseTester):
     @property
     def templates_root(self) -> Path:
@@ -31,6 +32,16 @@ class TestProtoPlugin(NmkBaseTester):
     def escape(self, to_escape: Path) -> str:
         # Escape backslashes (for Windows paths in json print)
         return '"' + str(to_escape).replace("\\", "\\\\") + '"'
+
+    @pytest.fixture
+    def clean_proto_link(self):
+        # yield to test
+        yield
+
+        # Remove linked venv folder from test folder, if any
+        linked_venv = self.test_folder / ".nmk" / "protos"
+        if linked_venv.exists():
+            linked_venv.unlink()
 
     def test_version(self):
         self.nmk(self.prepare_proto_project(), extra_args=["version"])

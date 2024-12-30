@@ -20,10 +20,6 @@ config:
     nmkPluginsDocs:
         nmk-proto: https://nmk-proto.readthedocs.io/
 
-    # Additional tools for code generation
-    venvPkgDeps:
-        - grpcio-tools
-
     # Recommended extension for proto files handling
     vscodeExtensionsNames:
         - zxh404.vscode-proto3

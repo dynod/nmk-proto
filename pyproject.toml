@@ -8,8 +8,8 @@ build-backend = "setuptools.build_meta"
 name = "nmk-proto"
 dynamic = ["version"]
 requires-python = ">=3.9"
-classifiers = ["Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12"]
-dependencies = ["grpcio", "protobuf", "nmk-base", "Jinja2"]
+classifiers = ["Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13"]
+dependencies = ["grpcio", "protobuf", "nmk-base", "Jinja2", "grpcio-tools"]
 description = "Code generation plugin from proto files for nmk build system"
 
 [[project.authors]]
@@ -23,7 +23,7 @@ file = "README.md"
 content-type = "text/markdown"
 
 [project.license]
-file = "LICENSE"
+text = "MIT License"
 
 [project.urls]
 Homepage = "https://github.com/dynod/nmk-proto"
@@ -61,6 +61,6 @@ addopts = ["--capture=sys", "--junit-xml=out/tests/report.xml", "--cov=src", "--
 [tool.coverage.run]
 data_file = "out/.coverage"
 concurrency = ["thread"]
-disable_warnings = ["no-data-collected"]
+disable_warnings = ["no-data-collected", "couldnt-parse"]
 branch = true
 omit = ["src/tests/*"]
