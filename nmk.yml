@@ -23,11 +23,17 @@ config:
     pythonPackageRequirements:
         - nmk-base
         - Jinja2
+        - grpcio-tools # Additional tools for code generation
 
     # Extra setup data
     pythonProjectFileItems:
         project:
             description: Code generation plugin from proto files for nmk build system
+        tool:
+            coverage:
+                run:
+                    disable_warnings:
+                        - couldnt-parse
 
     # Github issues logged in nmk project
     githubIssuesRepo: nmk

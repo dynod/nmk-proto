@@ -10,8 +10,8 @@ build
 grpcio
 grpcio-tools
 Jinja2
-myst-parser
 nmk-base
+nmk-doc
 nmk-vscode
 protobuf
 pytest-cov
@@ -19,9 +19,7 @@ pytest-multilog
 pytest-xdist
 ruff
 setuptools
-sphinx
 sphinx-autoapi
-sphinx_rtd_theme
 wheel
 
 
