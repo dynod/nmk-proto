@@ -6,20 +6,16 @@
 # Package dependencies from nmk project files
 #
 
-build
 grpcio
 grpcio-tools
 Jinja2
+nmk-badges
 nmk-base
 nmk-doc
+nmk-github
+nmk-python
 nmk-vscode
 protobuf
-pytest-cov
-pytest-multilog
-pytest-xdist
-ruff
-setuptools
 sphinx-autoapi
-wheel
 
 

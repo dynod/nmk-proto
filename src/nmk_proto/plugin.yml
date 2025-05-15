@@ -36,6 +36,3 @@ config:
             - protoc
             - protobuf
             - grpcio
-
-    # Global switch to disable checks
-    protoDisableCheck: false

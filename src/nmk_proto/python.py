@@ -79,7 +79,7 @@ class OutputPythonFilesFinder(NmkListConfigResolver):
 
             # Convert source proto file names to python ones
             return [
-                str(target_src / f"{str(p_file)[:-len(p_file.suffix)]}{suffix}.py")
+                str(target_src / f"{str(p_file)[: -len(p_file.suffix)]}{suffix}.py")
                 for p_file in [Path(p).relative_to(proto_src) for p in input_files]
                 for suffix in ["_pb2", "_pb2_grpc"]
             ] + [str(Path(p) / "__init__.py") for p in src_folders]
