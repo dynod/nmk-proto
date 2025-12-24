@@ -21,6 +21,7 @@
         "sdist",
         "venv",
         "pyproject",
+        "pyright",
         "rtype",
         "proto",
         "protos",
@@ -31,9 +32,6 @@
         "nmk",
         "pypi",
         "buildenv"
-    ],
-    "python.analysis.extraPaths": [
-        "src"
     ],
     "python.testing.pytestEnabled": true,
     "files.watcherExclude": {

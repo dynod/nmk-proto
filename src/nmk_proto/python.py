@@ -192,7 +192,7 @@ class ProtoPythonBuilder(TemplateBuilder):
         proto_paths = [self._make_absolute(o) for o in options]
 
         # Iterate on inputs (proto files)
-        for proto_file, target_subdir in zip(self.inputs, sub_folders):
+        for proto_file, target_subdir in zip(self.inputs, sub_folders, strict=True):
             # Delegate to protoc
             run_with_logs(
                 [sys.executable, "-m", "grpc_tools.protoc"]

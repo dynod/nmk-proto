@@ -7,8 +7,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nmk-proto"
 dynamic = ["version"]
-requires-python = ">=3.9"
-classifiers = ["Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13"]
+requires-python = ">=3.10"
+classifiers = ["Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14"]
 dependencies = ["grpcio", "protobuf", "nmk-base", "Jinja2", "grpcio-tools"]
 description = "Code generation plugin from proto files for nmk build system"
 
@@ -32,7 +32,7 @@ Issues = "https://github.com/dynod/nmk/issues?q=is%3Aopen+is%3Aissue+label%3Aplu
 
 [tool.setuptools.packages.find]
 where = ["src"]
-exclude = ["tests"]
+exclude = ["tests*"]
 namespaces = false
 
 [tool.setuptools.package-data]
@@ -44,13 +44,17 @@ file = "out/.pythonversion"
 [tool.distutils.bdist_wheel]
 plat-name = "any"
 
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+
 [tool.ruff]
 line-length = 160
 
 [tool.ruff.lint]
 select = ["E", "F", "UP", "B", "SIM", "I"]
 ignore = ["E203", "E501"]
-exclude = []
 
 [tool.pytest.ini_options]
 testpaths = ["src/tests"]
