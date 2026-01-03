@@ -30,6 +30,9 @@ Homepage = "https://github.com/dynod/nmk-proto"
 Repository = "https://github.com/dynod/nmk-proto"
 Issues = "https://github.com/dynod/nmk/issues?q=is%3Aopen+is%3Aissue+label%3Aplugin%3Aproto"
 
+[dependency-groups]
+dev = ["nmk-badges", "nmk-doc", "nmk-github", "nmk-python", "nmk-vscode", "sphinx-autoapi"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 exclude = ["tests*"]
