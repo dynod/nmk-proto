@@ -12,16 +12,16 @@ class TestProtoPlugin(NmkBaseTester):
     def templates_root(self) -> Path:
         return Path(__file__).parent / "templates"
 
-    def target_proto_folder(self, module_name: str = None) -> Path:
+    def target_proto_folder(self, module_name: str | None = None) -> Path:
         return self.test_folder / "protos" / ((Path("sample_module") / "api") if module_name is None else module_name)
 
-    def target_proto(self, module_name: str = None) -> Path:
+    def target_proto(self, module_name: str | None = None) -> Path:
         return self.target_proto_folder(module_name) / "sample.proto"
 
-    def target_proto2(self, module_name: str = None) -> Path:
+    def target_proto2(self, module_name: str | None = None) -> Path:
         return self.target_proto_folder(module_name) / "sample2.proto"
 
-    def prepare_proto_project(self, other_plugin: str = None, extra_proto: Path = None, module_name: str = None) -> Path:
+    def prepare_proto_project(self, other_plugin: str | None = None, extra_proto: Path | None = None, module_name: str | None = None) -> Path:
         # Build a sample project with proto files
         self.target_proto_folder(module_name).mkdir(exist_ok=True, parents=True)
         shutil.copyfile(self.template(self.target_proto(module_name).name), self.target_proto(module_name))
@@ -117,7 +117,7 @@ class TestProtoPlugin(NmkBaseTester):
         # Restore previous directory
         os.chdir(path_to_restore)
 
-    def test_check_python_failed(self, with_chdir):
+    def test_check_python_failed(self, with_chdir: None):
         # Generate python code from proto
         prj = self.prepare_proto_project("python_ko", extra_proto=self.target_proto2("sample_module_ko"), module_name="sample_module_ko")
         self.nmk(
@@ -131,12 +131,12 @@ class TestProtoPlugin(NmkBaseTester):
         self.nmk(prj, extra_args=["proto.check.py", "--config", '{"protoDisableCheck":true}'])
         self.check_logs("/[proto.check.py]] DEBUG 🐛 - Task skipped, nothing to do")
 
-    def test_check_python_ok(self, with_chdir):
+    def test_check_python_ok(self, with_chdir: None):
         # Generate python code from proto
         prj = self.prepare_proto_project("python_ok", module_name="sample_module_ok")
         self.nmk(prj, extra_args=["tests"])
 
-    def test_check_python_multiple(self, with_chdir):
+    def test_check_python_multiple(self, with_chdir: None):
         # Build a sample project with multiple proto files folders
         folder1 = self.target_proto_folder("sample_module/foo")
         folder1.mkdir(exist_ok=True, parents=True)
