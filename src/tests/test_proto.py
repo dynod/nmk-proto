@@ -75,9 +75,9 @@ class TestProtoPlugin(NmkBaseTester):
         )
         src_path = self.test_folder / "src" / "sample_module" / "api"
         self.check_logs(
-            f'{{ "pythonGeneratedSrcFiles": [ {self.escape(src_path / "sample_pb2.py")}, {self.escape(src_path / "sample_pb2_grpc.py")}, {self.escape(src_path.parent / "__init__.py")}, {self.escape(src_path / "__init__.py")} ], '
+            f'{{ "pythonGeneratedSrcFiles": [ {self.escape(src_path / "sample_pb2.py")}, {self.escape(src_path / "sample_pb2_grpc.py")}, {self.escape(src_path / "__init__.py")} ], '
             + f'"protoPythonCopiedFiles": [ {self.escape(src_path / "sample.proto")} ], '
-            + f'"protoPythonSrcFolders": [ {self.escape(src_path.parent)}, {self.escape(src_path)} ] }}'
+            + f'"protoPythonSrcFolders": [ {self.escape(src_path)} ] }}'
         )
 
     def test_generate_python(self):
