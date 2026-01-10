@@ -7,6 +7,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from typing import cast
 
 from nmk.model.builder import NmkTaskBuilder
 from nmk.model.keys import NmkRootConfig
@@ -20,7 +21,7 @@ _ERROR_LINE_PATTERN = re.compile("^([^ ]+Error: )(.*)")
 
 # Grab some config items
 def _get_python_src_folder(model: NmkModel) -> Path:
-    return Path(model.config["pythonSrcFolders"].value[0])
+    return Path(cast(list[str], model.config["pythonSrcFolders"].value)[0])
 
 
 class OutputFoldersFinder(NmkListConfigResolver):
@@ -28,7 +29,7 @@ class OutputFoldersFinder(NmkListConfigResolver):
     Generated python module folders resolver
     """
 
-    def get_value(self, name: str, input_subdirs: list[str]) -> list[str]:
+    def get_value(self, name: str, input_subdirs: list[str]) -> list[str]:  # type: ignore
         """
         List all generated python module folders
 
@@ -42,7 +43,7 @@ class OutputFoldersFinder(NmkListConfigResolver):
             target_src = _get_python_src_folder(self.model)
 
             # Rework list to add intermediate (empty) python packages
-            whole_set = set()
+            whole_set: set[Path] = set()
             for p in input_subdirs:
                 parts = list(Path(p).parts)
                 for i in range(1, len(parts) + 1):
@@ -61,7 +62,7 @@ class OutputPythonFilesFinder(NmkListConfigResolver):
     Generated python files resolver
     """
 
-    def get_value(self, name: str, folder: str, input_files: list[str], src_folders: list[str]) -> list[str]:
+    def get_value(self, name: str, folder: str, input_files: list[str], src_folders: list[str]) -> list[str]:  # type: ignore
         """
         List all generated python files names
 
@@ -92,7 +93,7 @@ class OutputProtoFilesFinder(NmkListConfigResolver):
     Copied proto files resolver
     """
 
-    def get_value(self, name: str, folder: str, input_files: list[str], src_folders: list[str]) -> list[str]:
+    def get_value(self, name: str, folder: str, input_files: list[str], src_folders: list[str]) -> list[str]:  # type: ignore
         """
         List all names of proto files copied in python source directory
 
@@ -145,7 +146,7 @@ class ProtoLinkBuilder(NmkTaskBuilder):
         # Only if link is not created yet
         if not self.main_output.exists():
             # Source path: check for root folder of Jinja module
-            src_path = Path(importlib.resources.files("jinja2")).parent
+            src_path = Path(cast(str, importlib.resources.files("jinja2"))).parent
 
             # Prepare output parent if not exists yet
             self.main_output.parent.mkdir(exist_ok=True, parents=True)
@@ -159,12 +160,12 @@ class ProtoPythonBuilder(TemplateBuilder):
     proto.gen.py task builder
     """
 
-    def _make_absolute(self, option: str) -> Path:
+    def _make_absolute(self, option: str) -> str:
         if not option.startswith("--") and not Path(option).is_absolute():
-            return str(Path(self.model.config[NmkRootConfig.PROJECT_DIR].value) / option)
+            return str(Path(cast(str, self.model.config[NmkRootConfig.PROJECT_DIR].value)) / option)
         return option
 
-    def build(self, init_template: str, all_input_subdirs: list[str], options: list[str], src_folders: list[str], extra_args: list[str]):
+    def build(self, init_template: str, all_input_subdirs: list[str], options: list[str], src_folders: list[str], extra_args: list[str]):  # type: ignore
         """
         Generate python files from input proto ones
 
@@ -181,11 +182,13 @@ class ProtoPythonBuilder(TemplateBuilder):
         # Grab some config items
         target_src, sub_folders = (_get_python_src_folder(self.model), all_input_subdirs)
 
-        # Clean and re-create target folders
+        # Clean content and re-create target folders
         for output_dir in src_folders:
             candidate_dir = target_src / output_dir
             if candidate_dir.is_dir():
-                shutil.rmtree(candidate_dir)
+                # Remove all files (but not sub-folders)
+                for f in filter(lambda f: f.is_file(), candidate_dir.iterdir()):
+                    f.unlink()
             candidate_dir.mkdir(parents=True, exist_ok=True)
 
         # Build proto paths list
@@ -206,14 +209,14 @@ class ProtoPythonBuilder(TemplateBuilder):
             shutil.copyfile(proto_file, target_src / target_subdir / proto_file.name)
 
         # Reorder output files
-        importable_files = {Path(out_folder).relative_to(target_src): [] for out_folder in src_folders}
+        importable_files: dict[Path, list[str]] = {Path(out_folder).relative_to(target_src): [] for out_folder in src_folders}
         for candidate in [p.relative_to(target_src) for p in filter(lambda f: f.name.endswith("_pb2.py"), self.outputs)]:
             importable_files[candidate.parent].append(candidate.as_posix()[: -len(candidate.suffix)].replace("/", "."))
 
         # Browse importable packages
         for p, modules in importable_files.items():
             # Generate init file
-            self.build_from_template(Path(init_template), target_src / p / "__init__.py", {"modules": modules})
+            self.build_from_template(Path(init_template), target_src / p / "__init__.py", {"modules": modules})  # type: ignore
 
 
 class ProtoPythonChecker(NmkTaskBuilder):
@@ -221,7 +224,7 @@ class ProtoPythonChecker(NmkTaskBuilder):
     proto.check.py task builder
     """
 
-    def build(self, src_folders: list[str]):
+    def build(self, src_folders: list[str]):  # type: ignore
         """
         Check generated python files import
 
@@ -237,4 +240,4 @@ class ProtoPythonChecker(NmkTaskBuilder):
             cp = run_with_logs([sys.executable, "-c", f"from {p.relative_to(target_src).as_posix().replace('/', '.')} import *"], check=False)
             if cp.returncode != 0:
                 # Just print meaningfull error
-                raise AssertionError(next(filter(lambda m: m is not None, map(_ERROR_LINE_PATTERN.match, cp.stderr.splitlines()))).group(2))
+                raise AssertionError(next(filter(lambda m: m is not None, map(_ERROR_LINE_PATTERN.match, cp.stderr.splitlines()))).group(2))  # type: ignore

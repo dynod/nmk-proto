@@ -3,6 +3,7 @@ File resolvers sub-module
 """
 
 from pathlib import Path
+from typing import cast
 
 from nmk.model.keys import NmkRootConfig
 from nmk.model.resolver import NmkListConfigResolver
@@ -13,7 +14,7 @@ class ProtoFilesFinder(NmkListConfigResolver):
     Input proto files resolver
     """
 
-    def get_value(self, name: str, folder: str) -> list[Path]:
+    def get_value(self, name: str, folder: str) -> list[Path]:  # type: ignore
         """
         List all proto files found in input folder
 
@@ -31,7 +32,7 @@ class ProtoAllSubDirsFinder(NmkListConfigResolver):
     Proto subfolders list resolver
     """
 
-    def get_value(self, name: str, folder: str, input_files: list[Path]) -> list[Path]:
+    def get_value(self, name: str, folder: str, input_files: list[Path]) -> list[Path]:  # type: ignore
         """
         List all proto sub-folders (one per file)
 
@@ -51,7 +52,7 @@ class ProtoUniqueSubDirsFinder(NmkListConfigResolver):
     Proto subfolders set resolver
     """
 
-    def get_value(self, name: str, input_subdirs: list[Path]) -> list[Path]:
+    def get_value(self, name: str, input_subdirs: list[Path]) -> list[Path]:  # type: ignore
         """
         List all proto sub-folders (no duplicates)
 
@@ -72,13 +73,13 @@ class ProtoPathOptionsBuilder(NmkListConfigResolver):
         # Make it project relative if possible
         if p.is_absolute():  # pragma: no branch
             try:
-                return p.relative_to(self.model.config[NmkRootConfig.PROJECT_DIR].value)
+                return p.relative_to(cast(str, self.model.config[NmkRootConfig.PROJECT_DIR].value))
             except ValueError:  # pragma: no cover
                 # Simply ignore, non project-relative
                 pass
         return p  # pragma: no cover
 
-    def get_value(self, name: str, folder: str, deps: list[str]) -> list[str]:
+    def get_value(self, name: str, folder: str, deps: list[str]) -> list[str]:  # type: ignore
         """
         Build path options list for protoc command
 
@@ -89,7 +90,7 @@ class ProtoPathOptionsBuilder(NmkListConfigResolver):
         """
 
         # Return a list of protoc path options
-        out = []
+        out: list[str] = []
         root = Path(folder)
         for p in map(self._make_relative, [root] + [Path(d) for d in deps]):
             out.extend(["--proto_path", p.as_posix()])
