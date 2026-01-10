@@ -8,7 +8,9 @@ As other plugins, **`nmk-proto`** registers its version and documentation link i
 
 ## Git ignored files
 
-Generated source code folders (i.e. **{ref}`${protoPythonSrcFolders}<protoPythonSrcFolders>`**) are automatically added to [git ignored files config item](https://nmk-base.readthedocs.io/en/stable/extend.html#git-ignored-files) for this project.
+Generated source code folders contained files (i.e. **{ref}`${protoPythonSrcFoldersWildcard}<protoPythonSrcFoldersWildcard>`**) are automatically added to [git ignored files config item](https://nmk-base.readthedocs.io/en/stable/extend.html#git-ignored-files) for this project.
+
+_<span style="color:orange">Changed in version 1.2.0</span>_ -- Previous contribution was **{ref}`${protoPythonSrcFolders}<protoPythonSrcFolders>`**
 
 ## Python project settings
 
